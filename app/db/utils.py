@@ -37,6 +37,15 @@ def drop_database(db_url: str, db_name: str) -> None:
         log.warning(f"Database {db_name} don't exist")
 
 
+def init_database(db_url: str, db_name: str) -> None:
+    import alembic.config
+    import alembic.command
+    alembic_config = alembic.config.Config('alembic.ini')
+    alembic_config.set_main_option('sqlalchemy.url', f'{db_url}/{db_name}')
+    alembic.command.upgrade(alembic_config, 'head')
+    log.warning(f'Alembic upgrade db: {db_url}/{db_name}')
+
+
 def create_table() -> None:
     Base.metadata.create_all(s.user_db.get_bind())
 

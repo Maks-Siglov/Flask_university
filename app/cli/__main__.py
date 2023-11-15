@@ -6,7 +6,7 @@ from app.db.utils import (
     create_database,
     drop_database,
     create_table,
-    drop_table,
+    init_database
 )
 from app.cofigs import (
     DB_NAME,
@@ -20,7 +20,14 @@ from app.cofigs import (
 @click.option('--create', is_flag=True, help='Create database')
 @click.option('--drop', is_flag=True, help='Drop database')
 @click.option('--recreate', is_flag=True, help='Recreate database')
-def db(db_name: str, create: bool, drop: bool, recreate: bool) -> None:
+@click.option('--init', is_flag=True, help='Execute alembic revision')
+def db(
+    db_name: str,
+    create: bool,
+    drop: bool,
+    recreate: bool,
+    init: bool,
+) -> None:
     base_superuser_url = f'{BASE_URL}/{POSTGRESS_DB}'
 
     if drop:
@@ -32,6 +39,9 @@ def db(db_name: str, create: bool, drop: bool, recreate: bool) -> None:
     if recreate:
         drop_database(base_superuser_url, db_name)
         create_database(base_superuser_url, db_name)
+
+    if init:
+        init_database(BASE_URL, db_name)
 
 
 if __name__ == '__main__':
