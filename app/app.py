@@ -7,7 +7,7 @@ from app.db.session import (
     pop_sessions,
     close_dbs
 )
-from app.cofigs import (
+from app.configs import (
     APP_HOST,
     APP_PORT,
     APP_DEBUG

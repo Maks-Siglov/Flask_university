@@ -6,7 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from app.db.models import Base
-from app.cofigs import (
+from app.configs import (
     BASE_URL,
     DB_NAME,
 )

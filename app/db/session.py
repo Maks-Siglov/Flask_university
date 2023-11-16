@@ -15,7 +15,7 @@ from sqlalchemy.orm import (
     sessionmaker,
 )
 
-from app.cofigs import (
+from app.configs import (
     DB_NAME,
     BASE_URL,
     ENGINE_OPTIONS,
@@ -44,7 +44,7 @@ class SessionExcept(Exception):
 
 def set_session() -> None:
     current_pool = get_sync_pool(f'{BASE_URL}/{DB_NAME}', ENGINE_OPTIONS)
-    s.user_db = current_pool.maker
+    s.user_db = current_pool.maker()
     s.user_db.connection(execution_options={'isolation_level': 'AUTOCOMMIT'})
 
 
