@@ -44,11 +44,12 @@ def load_db():
             student = students.pop()
             student.group = group
             assigned_students.append(student)
+        print('fff', group, len(group.students))
 
     s.user_db.add_all(assigned_students)
 
 
-def _create_students():
+def _create_students() -> list[Student]:
     """This function generate list with Student instances, equal to
     STUDENTS_AMOUNT"""
     return [
@@ -59,7 +60,7 @@ def _create_students():
     ]
 
 
-def _create_course():
+def _create_course() -> list[Course]:
     """This function generate list with Course instances"""
     return [
         Course(name=name, description=desc) for name, desc in COURSES.items()
