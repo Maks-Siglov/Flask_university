@@ -12,5 +12,5 @@ student_group_association_table = Table(
     "student_group_association",
     Base.metadata,
     Column("student_id", ForeignKey("students.id"), primary_key=True),
-    Column("courses_id", ForeignKey("courses.id"), primary_key=True),
+    Column("course_id", ForeignKey("courses.id"), primary_key=True),
 )

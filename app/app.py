@@ -1,12 +1,15 @@
 
+
 from typing import Any
 from flask import Flask
+from flask_restful import Api
 
 from app.db.session import (
     set_session,
     pop_sessions,
     close_dbs
 )
+from app.api.routers import SelectGroup
 from app.configs import (
     APP_HOST,
     APP_PORT,
@@ -16,6 +19,7 @@ from app.configs import (
 
 def create_app() -> Flask:
     app = Flask(__name__)
+    api = Api(app)
 
     app.before_request(set_session)
 
@@ -28,6 +32,8 @@ def create_app() -> Flask:
     def close_db(args: Any) -> Any:
         close_dbs()
         return args
+
+    api.add_resource(SelectGroup, '/')
 
     return app
 

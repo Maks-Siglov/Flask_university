@@ -37,9 +37,9 @@ class Student(Base):
 
     def __repr__(self):
         return (
-            f'Student({self.id})'
+            f'Student({self.id},'
             f' {self.first_name},'
-            f' {self.last_name}),'
+            f' {self.last_name},'
             f' {self.group},'
-            f' {self.courses}'
+            f' {self.courses})'
         )
