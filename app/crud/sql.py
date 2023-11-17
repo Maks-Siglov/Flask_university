@@ -68,65 +68,39 @@ def delete_student(student_id) -> None:
 
 
 def add_student_to_course(student_id, course_name) -> None:
-    """This function take course from database by course_name, after checks if
-    student don't already assigned to course, if not insert query executed"""
+    """This function take course from database by course_name and insert
+    student to it"""
     course = _take_course_by_name(course_name)
+    print(type(course_name), course)
+    insert_statement = (
+        insert(student_group_association_table)
+        .values(student_id=student_id, course_id=course.id)
+    )
 
-    if _check_student_assigned_to_course(student_id, course.id):
-        log.error(
-            f'Student {student_id} already assigned to the {course_name}'
-        )
-    else:
-        insert_statement = (
-            insert(student_group_association_table)
-            .values(student_id=student_id, course_id=course.id)
-        )
-
-        s.user_db.execute(insert_statement)
+    s.user_db.execute(insert_statement)
 
 
 def remove_student_from_course(student_id, course_name) -> None:
-    """This function take course from database by course_name, after checks if
-    student assigned to course then removes him from database"""
+    """This function take course from database by course_name then removes
+    student from course"""
     course = _take_course_by_name(course_name)
 
-    if not _check_student_assigned_to_course(student_id, course.id):
-        log.error(
-            f"Student {student_id} already don't assigned to {course_name}"
-        )
-    else:
-        delete_statement = (
-            delete(student_group_association_table)
-            .where(and_(
-                student_group_association_table.c.student_id == student_id,
-                student_group_association_table.c.course_id == course.id
-            ))
-        )
+    delete_statement = (
+        delete(student_group_association_table)
+        .where(and_(
+            student_group_association_table.c.student_id == student_id,
+            student_group_association_table.c.course_id == course.id
+        ))
+    )
 
-        s.user_db.execute(delete_statement)
+    s.user_db.execute(delete_statement)
 
 
-def _take_course_by_name(course_name) -> Course | ValueError:
+def _take_course_by_name(course_name) -> Course:
     """This function return course by course_name, if it not exists
-     ValueError raised"""
+    ValueError raised"""
     statement = (
         select(Course)
         .where(Course.name == course_name)
     )
-    course = s.user_db.scalar(statement)
-    if not course:
-        raise ValueError(f'Course {course_name} not exist')
-
-    return course
-
-
-def _check_student_assigned_to_course(student_id, course_id) -> Course | None:
-    """This function checks if student assigned to course"""
-    existing_statement = (
-        select(student_group_association_table)
-        .where(and_(
-            student_group_association_table.c.student_id == student_id,
-            student_group_association_table.c.course_id == course_id
-        ))
-    )
-    return s.user_db.scalar(existing_statement)
+    return s.user_db.scalar(statement)

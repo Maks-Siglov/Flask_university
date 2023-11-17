@@ -9,7 +9,14 @@ from app.db.session import (
     pop_sessions,
     close_dbs
 )
-from app.api.routers import SelectGroup
+from app.api.routers import (
+    SelectGroup,
+    CourseStudents,
+    AddStudent,
+    DeleteStudent,
+    AddStudentToCourse,
+    RemoveStudentFromCourse,
+)
 from app.configs import (
     APP_HOST,
     APP_PORT,
@@ -34,6 +41,11 @@ def create_app() -> Flask:
         return args
 
     api.add_resource(SelectGroup, '/')
+    api.add_resource(CourseStudents, '/course_students')
+    api.add_resource(AddStudent, '/add_student')
+    api.add_resource(DeleteStudent, '/delete_student')
+    api.add_resource(AddStudentToCourse, '/add_student_to_course')
+    api.add_resource(RemoveStudentFromCourse, '/remove_student_from_course')
 
     return app
 

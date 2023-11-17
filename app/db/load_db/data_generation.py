@@ -44,7 +44,6 @@ def load_db():
             student = students.pop()
             student.group = group
             assigned_students.append(student)
-        print('fff', group, len(group.students))
 
     s.user_db.add_all(assigned_students)
 
