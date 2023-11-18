@@ -5,7 +5,7 @@ import click
 from app.db.load_db.data_generation import load_db
 from app.db.session import (
     set_session,
-    pop_sessions,
+    pop_session,
     close_dbs
 )
 from app.db.utils import (
@@ -52,7 +52,7 @@ def db(
         set_session()
         create_table()
         load_db()
-        pop_sessions()
+        pop_session()
         close_dbs()
 
     if init:

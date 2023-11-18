@@ -71,7 +71,7 @@ def add_student_to_course(student_id, course_name) -> None:
     """This function take course from database by course_name and insert
     student to it"""
     course = _take_course_by_name(course_name)
-    print(type(course_name), course)
+
     insert_statement = (
         insert(student_course_association_table)
         .values(student_id=student_id, course_id=course.id)

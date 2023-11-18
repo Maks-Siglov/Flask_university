@@ -3,19 +3,18 @@
 from typing import Any
 from flask import Flask
 from flask_restful import Api
+from flasgger import Swagger
 
 from app.db.session import (
     set_session,
-    pop_sessions,
+    pop_session,
     close_dbs
 )
 from app.api.university.routers import (
     SelectGroup,
     CourseStudents,
-    AddStudent,
-    DeleteStudent,
-    AddStudentToCourse,
-    RemoveStudentFromCourse,
+    Student,
+    StudentCourse,
 )
 from app.configs import (
     APP_HOST,
@@ -27,12 +26,13 @@ from app.configs import (
 def create_app() -> Flask:
     app = Flask(__name__)
     api = Api(app)
+    Swagger(app)
 
     app.before_request(set_session)
 
     @app.teardown_request
     def handle_session(args: Any) -> Any:
-        pop_sessions()
+        pop_session()
         return args
 
     @app.teardown_appcontext
@@ -42,10 +42,8 @@ def create_app() -> Flask:
 
     api.add_resource(SelectGroup, '/select_group')
     api.add_resource(CourseStudents, '/course_students')
-    api.add_resource(AddStudent, '/add_student')
-    api.add_resource(DeleteStudent, '/delete_student')
-    api.add_resource(AddStudentToCourse, '/add_student_to_course')
-    api.add_resource(RemoveStudentFromCourse, '/remove_student_from_course')
+    api.add_resource(Student, '/student')
+    api.add_resource(StudentCourse, '/student_course')
 
     return app
 

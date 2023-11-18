@@ -76,7 +76,7 @@ def _create_sessionmaker(engine: Engine) -> sessionmaker:
     return sessionmaker(bind=engine, expire_on_commit=False, future=True)
 
 
-def pop_sessions() -> None:
+def pop_session() -> None:
     try:
         s.user_db.commit()
     except Exception as e:

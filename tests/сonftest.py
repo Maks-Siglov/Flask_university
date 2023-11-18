@@ -11,7 +11,7 @@ from app.db.utils import (
 )
 from app.db.session import (
     set_session,
-    pop_sessions,
+    pop_session,
     close_dbs,
 )
 from app.configs import (
@@ -25,21 +25,22 @@ BASE_SUPERUSER_URL = f'{BASE_URL}/{POSTGRESS_DB}'
 
 @pytest.fixture(scope='session')
 def app():
-    yield create_app()
+    app = create_app()
+    yield app
 
 
 @pytest.fixture(scope='session')
 def client(app):
-    yield app.test_client()
+    return app.test_client()
 
 
 @pytest.hookimpl(tryfirst=True)
 def pytest_sessionstart(session):
-    set_session()
     create_database(BASE_SUPERUSER_URL, DB_NAME)
+    set_session()
     create_table()
     load_db()
-    pop_sessions()
+    pop_session()
 
 
 @pytest.hookimpl(tryfirst=True)
