@@ -1,11 +1,11 @@
 
 
-from flask_restful import(
+from flask_restful import (
     Resource,
     reqparse,
 )
 
-from app.crud.sql import (
+from app.crud.university import (
     less_or_equal_students_in_group,
     course_students,
     add_student,
@@ -27,9 +27,8 @@ class SelectGroup(Resource):
     def get(self):
         args = parser.parse_args()
         student_amount = args.get('student_amount')
-        result = less_or_equal_students_in_group(student_amount)
-        res = {group.id: group.name for group in result}
-        return {'less or equal': res}
+        query_result = less_or_equal_students_in_group(student_amount)
+        return [group.to_dict() for group in query_result]
 
 
 class CourseStudents(Resource):
@@ -37,8 +36,7 @@ class CourseStudents(Resource):
         args = parser.parse_args()
         course_name = args.get('course')
         result = course_students(course_name)
-        res = [[student.first_name, student.last_name] for student in result]
-        return {course_name: res}
+        return {course_name: [student.to_dict()for student in result]}
 
 
 class AddStudent(Resource):
@@ -53,7 +51,7 @@ class AddStudent(Resource):
 
 
 class DeleteStudent(Resource):
-    def post(self):
+    def delete(self):
         args = parser.parse_args()
         student_id = args.get('student_id')
         delete_student(student_id)
@@ -73,7 +71,7 @@ class AddStudentToCourse(Resource):
 
 
 class RemoveStudentFromCourse(Resource):
-    def post(self):
+    def delete(self):
         args = parser.parse_args()
         student_id = args.get('student_id')
         course_name = args.get('course')

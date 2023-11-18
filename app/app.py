@@ -9,7 +9,7 @@ from app.db.session import (
     pop_sessions,
     close_dbs
 )
-from app.api.routers import (
+from app.api.university.routers import (
     SelectGroup,
     CourseStudents,
     AddStudent,
@@ -40,7 +40,7 @@ def create_app() -> Flask:
         close_dbs()
         return args
 
-    api.add_resource(SelectGroup, '/')
+    api.add_resource(SelectGroup, '/select_group')
     api.add_resource(CourseStudents, '/course_students')
     api.add_resource(AddStudent, '/add_student')
     api.add_resource(DeleteStudent, '/delete_student')

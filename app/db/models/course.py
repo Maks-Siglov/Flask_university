@@ -7,8 +7,8 @@ from sqlalchemy.orm import (
 )
 
 from app.db.models.base import Base
-from app.db.models.student_group_association import (
-    student_group_association_table
+from app.db.models.student_course_association import (
+    student_course_association_table
 )
 
 if TYPE_CHECKING:
@@ -24,7 +24,7 @@ class Course(Base):
     description: Mapped[str] = mapped_column()
 
     students: Mapped[list['Student']] = relationship(
-        secondary=student_group_association_table, back_populates='courses'
+        secondary=student_course_association_table, back_populates='courses'
     )
 
     def __repr__(self):

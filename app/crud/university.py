@@ -16,7 +16,7 @@ from app.db.models import (
     Group,
     Course,
     Student,
-    student_group_association_table,
+    student_course_association_table,
 )
 
 log = logging.getLogger(__name__)
@@ -58,8 +58,8 @@ def delete_student(student_id) -> None:
     """At first function deletes student association with courses, after
     delete student itself"""
     delete_association_statement = (
-        delete(student_group_association_table)
-        .where(student_group_association_table.c.student_id == student_id)
+        delete(student_course_association_table)
+        .where(student_course_association_table.c.student_id == student_id)
     )
     s.user_db.execute(delete_association_statement)
 
@@ -73,7 +73,7 @@ def add_student_to_course(student_id, course_name) -> None:
     course = _take_course_by_name(course_name)
     print(type(course_name), course)
     insert_statement = (
-        insert(student_group_association_table)
+        insert(student_course_association_table)
         .values(student_id=student_id, course_id=course.id)
     )
 
@@ -86,10 +86,10 @@ def remove_student_from_course(student_id, course_name) -> None:
     course = _take_course_by_name(course_name)
 
     delete_statement = (
-        delete(student_group_association_table)
+        delete(student_course_association_table)
         .where(and_(
-            student_group_association_table.c.student_id == student_id,
-            student_group_association_table.c.course_id == course.id
+            student_course_association_table.c.student_id == student_id,
+            student_course_association_table.c.course_id == course.id
         ))
     )
 

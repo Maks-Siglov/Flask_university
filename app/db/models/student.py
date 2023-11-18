@@ -9,8 +9,8 @@ from sqlalchemy.orm import (
 )
 
 from app.db.models.base import Base
-from app.db.models.student_group_association import (
-    student_group_association_table
+from app.db.models.student_course_association import (
+    student_course_association_table
 )
 
 if TYPE_CHECKING:
@@ -32,8 +32,16 @@ class Student(Base):
     group: Mapped['Group'] = relationship(back_populates='students')
 
     courses: Mapped[list['Course']] = relationship(
-        secondary=student_group_association_table, back_populates='students'
+        secondary=student_course_association_table, back_populates='students'
     )
+
+    def to_dict(self) -> dict[str, any]:
+        return {
+            'id': self.id,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'group_id': self.group_id,
+        }
 
     def __repr__(self):
         return (
