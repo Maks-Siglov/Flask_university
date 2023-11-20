@@ -1,6 +1,9 @@
 
 
-from typing import TYPE_CHECKING
+from typing import (
+    Any,
+    TYPE_CHECKING,
+)
 
 from sqlalchemy import String
 from sqlalchemy.orm import (
@@ -24,7 +27,7 @@ class Group(Base):
 
     students: Mapped[list['Student']] = relationship(back_populates='group')
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, Any]:
         return {'id': self.id, 'name': self.name}
 
     def __repr__(self):

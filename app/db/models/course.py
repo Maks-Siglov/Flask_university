@@ -1,5 +1,9 @@
 
-from typing import TYPE_CHECKING
+
+from typing import (
+    Any,
+    TYPE_CHECKING,
+)
 
 from sqlalchemy.orm import (
     Mapped,
@@ -28,7 +32,7 @@ class Course(Base):
         secondary=student_course_association_table, back_populates='courses'
     )
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, Any]:
         return {
             'id': self.id,
             'name': self.name,

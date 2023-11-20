@@ -23,6 +23,12 @@ from app.db.session import (
     set_session,
 )
 
+SELECT_GROUP_ROUTE = '/select_group/<int:student_amount>'
+COURSE_STUDENTS_ROUTE = '/course_students/<string:course_name>'
+STUDENT_POST_ROUTE = '/student'
+STUDENT_DELETE_ROUTE = '/student/<int:student_id>'
+STUDENT_TO_COURSE_ROUTE = '/student/<int:student_id>/course/<int:course_id>'
+
 
 def create_app() -> Flask:
     app = Flask(__name__)
@@ -41,12 +47,10 @@ def create_app() -> Flask:
         close_dbs()
         return args
 
-    api.add_resource(SelectGroup, '/select_group/<int:student_amount>/')
-    api.add_resource(CourseStudents, '/course_students/<string:course_name>')
-    api.add_resource(Student, '/student/<int:student_id>', '/student/')
-    api.add_resource(
-        StudentCourse, '/student/<int:student_id>/course/<int:course_id>'
-    )
+    api.add_resource(SelectGroup, SELECT_GROUP_ROUTE)
+    api.add_resource(CourseStudents, COURSE_STUDENTS_ROUTE)
+    api.add_resource(Student, STUDENT_POST_ROUTE, STUDENT_DELETE_ROUTE)
+    api.add_resource(StudentCourse, STUDENT_TO_COURSE_ROUTE)
 
     return app
 

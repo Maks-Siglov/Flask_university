@@ -8,6 +8,8 @@ from app.configs import (
     DB_NAME,
     POSTGRESS_DB,
 )
+from app.db.session import s
+from app.db.models import Student
 from app.db.load_db.data_generation import load_db
 from app.db.session import (
     close_dbs,

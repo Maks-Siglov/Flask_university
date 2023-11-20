@@ -23,7 +23,9 @@ from app.db.session import s
 log = logging.getLogger(__name__)
 
 
-def less_or_equal_students_in_group(students_amount: int) -> list[Group] | None:
+def less_or_equal_students_in_group(
+        students_amount: int
+) -> list[Group] | None:
     """This query return groups which has less or equal amount of student then
     the specified argument"""
     statement = (

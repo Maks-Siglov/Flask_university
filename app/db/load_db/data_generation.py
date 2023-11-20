@@ -20,7 +20,7 @@ from app.db.models import (
 from app.db.session import s
 
 
-def load_db():
+def load_db() -> None:
     """This function takes generated students, groups and courses after it
     assign to each student random amount of courses (from 1 to 3) then it
     fills groups by students and add to the database

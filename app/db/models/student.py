@@ -1,6 +1,9 @@
 
 
-from typing import TYPE_CHECKING
+from typing import (
+    Any,
+    TYPE_CHECKING,
+)
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import (
@@ -36,7 +39,7 @@ class Student(Base):
         secondary=student_course_association_table, back_populates='students'
     )
 
-    def to_dict(self) -> dict[str, any]:
+    def to_dict(self) -> dict[str, Any]:
         student_dict = {
             'id': self.id,
             'first_name': self.first_name,

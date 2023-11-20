@@ -1,6 +1,9 @@
 
 
-from flask import Response, request, jsonify
+from flask import (
+    Response,
+    request
+)
 from flask_restful import Resource
 
 from app.api.university.models import StudentRequest
@@ -53,27 +56,22 @@ class CourseStudents(Resource):
         responses:
           200:
             description: Returns students assigned to course
-            examples: {
-                    'application/json': {
-                        Mathematics : [
-                            {
-                                "id": 8,
-                                "first_name": "Katherine",
-                                "last_name": "Thomas",
-                                "group_id": 4
-                            },
-                            {
-                                "id": 162,
-                                "first_name": "Taylor",
-                                "last_name": "Jones",
-                                "group_id": 9
-                            }
-                        ]
-                    }
-                }
+            examples:
+                    'application/json': [
+                        {
+                          'id': 2,
+                          'first_name': 'Jacob',
+                          'last_name': 'Martin'
+                        },
+                        {
+                          'id': 2,
+                          'first_name': 'Bob',
+                          'last_name': 'Jackson'
+                        }
+                    ]
         """
         students = course_students(course_name)
-        return {course_name: [student.to_dict() for student in students]}
+        return [student.to_dict() for student in students]
 
 
 class Student(Resource):
@@ -91,6 +89,8 @@ class Student(Resource):
         responses:
           201:
             description: Student added successfully
+          422:
+            description: Invalid types in requests
         """
         try:
             student = StudentRequest(**request.get_json())
@@ -98,7 +98,7 @@ class Student(Resource):
         except TypeError as exc:
             return Response(f'Not valid data {exc}', status=422)
 
-        return Response(f'id={student_id}', status=201)
+        return Response(f'id = {student_id}', status=201)
 
     def delete(self, student_id: int) -> Response:
         """
