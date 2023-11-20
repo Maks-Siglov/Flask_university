@@ -1,12 +1,12 @@
 
 
 import logging
-
 from contextvars import ContextVar
 from dataclasses import dataclass
+
 from sqlalchemy import (
-    create_engine,
     Engine,
+    create_engine,
     select,
 )
 from sqlalchemy.orm import (
@@ -16,8 +16,8 @@ from sqlalchemy.orm import (
 )
 
 from app.configs import (
-    DB_NAME,
     BASE_URL,
+    DB_NAME,
     ENGINE_OPTIONS,
 )
 

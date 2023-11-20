@@ -2,22 +2,14 @@
 
 import click
 
+from app.configs import BASE_URL, DB_NAME, POSTGRESS_DB
 from app.db.load_db.data_generation import load_db
-from app.db.session import (
-    set_session,
-    pop_session,
-    close_dbs
-)
+from app.db.session import close_dbs, pop_session, set_session
 from app.db.utils import (
     create_database,
-    drop_database,
     create_table,
+    drop_database,
     init_database,
-)
-from app.configs import (
-    DB_NAME,
-    BASE_URL,
-    POSTGRESS_DB,
 )
 
 

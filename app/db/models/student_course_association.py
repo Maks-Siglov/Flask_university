@@ -1,9 +1,9 @@
 
 
 from sqlalchemy import (
-    Table,
+    Column,
     ForeignKey,
-    Column
+    Table
 )
 
 from app.db.models.base import Base

@@ -3,21 +3,21 @@
 import random
 import string
 
-from app.db.session import s
-from app.db.models import (
-    Group,
-    Student,
-    Course,
-)
-from app.db.load_db.data_for_generation import (
-    STUDENT_FIRS_NAMES,
-    STUDENT_LAST_NAMES,
-    COURSES,
-)
 from app.configs import (
     GROUPS_AMOUNT,
-    STUDENTS_AMOUNT,
+    STUDENTS_AMOUNT
 )
+from app.db.load_db.data_for_generation import (
+    COURSES,
+    STUDENT_FIRS_NAMES,
+    STUDENT_LAST_NAMES,
+)
+from app.db.models import (
+    Course,
+    Group,
+    Student,
+)
+from app.db.session import s
 
 
 def load_db():

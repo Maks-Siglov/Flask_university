@@ -3,21 +3,21 @@
 import pytest
 
 from app.app import create_app
+from app.configs import (
+    BASE_URL,
+    DB_NAME,
+    POSTGRESS_DB,
+)
 from app.db.load_db.data_generation import load_db
+from app.db.session import (
+    close_dbs,
+    pop_session,
+    set_session,
+)
 from app.db.utils import (
     create_database,
     create_table,
-    drop_database
-)
-from app.db.session import (
-    set_session,
-    pop_session,
-    close_dbs,
-)
-from app.configs import (
-    BASE_URL,
-    POSTGRESS_DB,
-    DB_NAME,
+    drop_database,
 )
 
 BASE_SUPERUSER_URL = f'{BASE_URL}/{POSTGRESS_DB}'
@@ -25,8 +25,7 @@ BASE_SUPERUSER_URL = f'{BASE_URL}/{POSTGRESS_DB}'
 
 @pytest.fixture(scope='session')
 def app():
-    app = create_app()
-    yield app
+    yield create_app()
 
 
 @pytest.fixture(scope='session')

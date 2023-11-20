@@ -1,5 +1,6 @@
 
 from typing import TYPE_CHECKING
+
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
@@ -26,6 +27,13 @@ class Course(Base):
     students: Mapped[list['Student']] = relationship(
         secondary=student_course_association_table, back_populates='courses'
     )
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+        }
 
     def __repr__(self):
         return f'Course({self.id}, {self.name}, {self.description})'

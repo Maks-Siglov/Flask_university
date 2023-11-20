@@ -1,25 +1,26 @@
 
 
 from typing import Any
+
+from flasgger import Swagger
 from flask import Flask
 from flask_restful import Api
-from flasgger import Swagger
 
-from app.db.session import (
-    set_session,
-    pop_session,
-    close_dbs
-)
 from app.api.university.routers import (
-    SelectGroup,
     CourseStudents,
+    SelectGroup,
     Student,
     StudentCourse,
 )
 from app.configs import (
+    APP_DEBUG,
     APP_HOST,
     APP_PORT,
-    APP_DEBUG
+)
+from app.db.session import (
+    close_dbs,
+    pop_session,
+    set_session,
 )
 
 
@@ -40,10 +41,12 @@ def create_app() -> Flask:
         close_dbs()
         return args
 
-    api.add_resource(SelectGroup, '/select_group')
-    api.add_resource(CourseStudents, '/course_students')
-    api.add_resource(Student, '/student')
-    api.add_resource(StudentCourse, '/student_course')
+    api.add_resource(SelectGroup, '/select_group/<int:student_amount>/')
+    api.add_resource(CourseStudents, '/course_students/<string:course_name>')
+    api.add_resource(Student, '/student/<int:student_id>', '/student/')
+    api.add_resource(
+        StudentCourse, '/student/<int:student_id>/course/<int:course_id>'
+    )
 
     return app
 

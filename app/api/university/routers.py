@@ -1,36 +1,29 @@
 
 
-from flask_restful import (
-    Resource,
-    reqparse,
-)
+from flask import Response, request, jsonify
+from flask_restful import Resource
 
+from app.api.university.models import StudentRequest
 from app.crud.university import (
-    less_or_equal_students_in_group,
-    course_students,
     add_student,
-    delete_student,
     add_student_to_course,
+    course_students,
+    delete_student,
+    less_or_equal_students_in_group,
     remove_student_from_course,
-
+    check_student_assigned_to_course,
+    get_student,
 )
-
-parser = reqparse.RequestParser()
-parser.add_argument('first_name', type=str, location='args')
-parser.add_argument('last_name', type=str, location='args')
-parser.add_argument('student_amount', type=int, location='args')
-parser.add_argument('course_name', type=str, location='args')
-parser.add_argument('student_id', type=int, location='args')
 
 
 class SelectGroup(Resource):
-    def get(self):
+    def get(self, student_amount):
         """
         This method retrieves a groups with less or equal student amount
         ---
         parameters:
           - name: student_amount
-            in: query
+            in: path
             type: int
 
         responses:
@@ -43,20 +36,18 @@ class SelectGroup(Resource):
                     ]
                 }
         """
-        args = parser.parse_args()
-        student_amount = args.get('student_amount')
         query_result = less_or_equal_students_in_group(student_amount)
         return [group.to_dict() for group in query_result]
 
 
 class CourseStudents(Resource):
-    def get(self):
+    def get(self, course_name):
         """
         This method retrieves students which related to course"
         ---
         parameters:
           - name: course_name
-            in: query
+            in: path
             type: string
 
         responses:
@@ -81,14 +72,12 @@ class CourseStudents(Resource):
                     }
                 }
         """
-        args = parser.parse_args()
-        course_name = args.get('course_name')
-        result = course_students(course_name)
-        return {course_name: [student.to_dict()for student in result]}
+        students = course_students(course_name)
+        return {course_name: [student.to_dict() for student in students]}
 
 
 class Student(Resource):
-    def post(self):
+    def post(self) -> Response:
         """
         This method add a new student to the database
         ---
@@ -100,18 +89,18 @@ class Student(Resource):
             in: query
             type: string
         responses:
-          200:
+          201:
             description: Student added successfully
         """
-        args = parser.parse_args()
-        first_name = args.get('first_name')
-        last_name = args.get('last_name')
+        try:
+            student = StudentRequest(**request.get_json())
+            student_id = add_student(student)
+        except TypeError as exc:
+            return Response(f'Not valid data {exc}', status=422)
 
-        add_student(first_name, last_name)
+        return Response(f'id={student_id}', status=201)
 
-        return f'Student {first_name} {last_name} added successfully'
-
-    def delete(self):
+    def delete(self, student_id: int) -> Response:
         """
         This method remove student from database by student_id
         ---
@@ -120,18 +109,18 @@ class Student(Resource):
             in: query
             type: int
         responses:
-          200:
+          204:
             description: Student removed successfully
         """
-        args = parser.parse_args()
-        student_id = args.get('student_id')
-        delete_student(student_id)
+        if not get_student(student_id):
+            return Response(f"Student {student_id} don't exist", status=404)
 
-        return f'Student with id {student_id} deleted successfully'
+        delete_student(student_id)
+        return Response(None, status=204)
 
 
 class StudentCourse(Resource):
-    def post(self):
+    def post(self, student_id: int, course_id: int) -> Response:
         """
         This method add student to the course
         ---
@@ -143,36 +132,44 @@ class StudentCourse(Resource):
             in: query
             type: string
         responses:
-          200:
+          201:
             description: Student added to course successfully
+          409:
+            description: Student already assigned to the course
         """
-        args = parser.parse_args()
-        student_id = args.get('student_id')
-        course_name = args.get('course')
+        if check_student_assigned_to_course(student_id, course_id):
+            message = (
+                f'Student {student_id} already assigned to course {course_id}'
+            )
+            return Response(message, status=409)
 
-        add_student_to_course(student_id, course_name)
+        add_student_to_course(student_id, course_id)
+        message = f'Student {student_id} added to course{course_id}'
+        return Response(message, status=201)
 
-        return f'Student with id {student_id} added to {course_name}'
-
-    def delete(self):
+    def delete(self, student_id: int, course_id: int) -> Response:
         """
         This method removes student from the course
         ---
         parameters:
           - name: student_id
-            in: query
+            in: path
             type: int
-          - name: course
-            in: query
-            type: string
+          - name: course_id
+            in: path
+            type: id
         responses:
-          200:
+          204:
             description: Student removed from course successfully
+          404:
+            description: Student don't assigned to the course
         """
-        args = parser.parse_args()
-        student_id = args.get('student_id')
-        course_name = args.get('course')
+        if check_student_assigned_to_course(student_id, course_id):
+            message = (
+                f"Student  {student_id} don't assigned to course {course_id}"
+            )
+            return Response(message, status=404)
 
-        remove_student_from_course(student_id, course_name)
-
-        return f'Student with id {student_id} deleted from {course_name}'
+        remove_student_from_course(student_id, course_id)
+        message = f'Student {student_id} removed from course{course_id}'
+        return Response(message, status=204)

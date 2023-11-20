@@ -1,6 +1,7 @@
 
 
 from typing import TYPE_CHECKING
+
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import (
     Mapped,
@@ -36,12 +37,16 @@ class Student(Base):
     )
 
     def to_dict(self) -> dict[str, any]:
-        return {
+        student_dict = {
             'id': self.id,
             'first_name': self.first_name,
             'last_name': self.last_name,
-            'group_id': self.group_id,
+            'group': None,
+            'courses': [course.to_dict() for course in self.courses]
         }
+        if self.group:
+            student_dict['group'] = self.group.to_dict()
+        return student_dict
 
     def __repr__(self):
         return (
