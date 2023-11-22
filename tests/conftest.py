@@ -35,6 +35,12 @@ def client(app):
     return app.test_client()
 
 
+@pytest.fixture(scope='session')
+def add_201_id_student():
+    student = Student(first_name='test_name', last_name='test_last_name')
+    s.user_db.add(student)
+
+
 @pytest.hookimpl(tryfirst=True)
 def pytest_sessionstart(session):
     create_database(BASE_SUPERUSER_URL, DB_NAME)

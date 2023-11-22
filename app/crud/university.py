@@ -1,5 +1,6 @@
 
 
+from typing import Union
 import logging
 
 from sqlalchemy import (
@@ -10,6 +11,7 @@ from sqlalchemy import (
     select,
 )
 from sqlalchemy.orm import selectinload
+from sqlalchemy.sql import Select
 
 from app.api.university.models import StudentRequest
 from app.db.models import (
@@ -106,13 +108,26 @@ def remove_student_from_course(student_id: int, course_id: int) -> None:
 def check_student_assigned_to_course(
         student_id: int,
         course_id: int,
-) -> Course | None:
+) -> Union[student_course_association_table, None]:
     """This function checks if student assigned to course"""
-    existing_statement = (
+    statement = _student_to_course_statement(student_id, course_id)
+    return s.user_db.scalar(statement)
+
+
+def get_student_assigned_to_course(
+        student_id: int,
+        course_id: int,
+) -> Union[student_course_association_table, None]:
+    """This function returns student association to course"""
+    statement = _student_to_course_statement(student_id, course_id)
+    return s.user_db.execute(statement).first()
+
+
+def _student_to_course_statement(student_id: int, course_id: int,) -> Select:
+    return (
         select(student_course_association_table)
         .where(and_(
             student_course_association_table.c.student_id == student_id,
             student_course_association_table.c.course_id == course_id
         ))
     )
-    return s.user_db.scalar(existing_statement)

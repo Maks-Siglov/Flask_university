@@ -27,7 +27,7 @@ SELECT_GROUP_ROUTE = '/select_group/<int:student_amount>'
 COURSE_STUDENTS_ROUTE = '/course_students/<string:course_name>'
 STUDENT_POST_ROUTE = '/student'
 STUDENT_DELETE_ROUTE = '/student/<int:student_id>'
-STUDENT_TO_COURSE_ROUTE = '/student/<int:student_id>/course/<int:course_id>'
+STUDENT_TO_COURSE_ROUTE = '/student_to_course'
 
 
 def create_app() -> Flask:

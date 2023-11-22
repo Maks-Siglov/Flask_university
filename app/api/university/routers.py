@@ -6,7 +6,10 @@ from flask import (
 )
 from flask_restful import Resource
 
-from app.api.university.models import StudentRequest
+from app.api.university.models import (
+    StudentRequest,
+    StudentCourserRequest
+)
 from app.crud.university import (
     add_student,
     add_student_to_course,
@@ -120,7 +123,7 @@ class Student(Resource):
 
 
 class StudentCourse(Resource):
-    def post(self, student_id: int, course_id: int) -> Response:
+    def post(self) -> Response:
         """
         This method add student to the course
         ---
@@ -136,7 +139,16 @@ class StudentCourse(Resource):
             description: Student added to course successfully
           409:
             description: Student already assigned to the course
+          422:
+            description: Invalid types in requests
         """
+        try:
+            student_course_ids = StudentCourserRequest(**request.get_json())
+            student_id = student_course_ids.student_id
+            course_id = student_course_ids.course_id
+        except TypeError as exc:
+            return Response(f'Not valid data {exc}', status=422)
+
         if check_student_assigned_to_course(student_id, course_id):
             message = (
                 f'Student {student_id} already assigned to course {course_id}'
@@ -147,7 +159,7 @@ class StudentCourse(Resource):
         message = f'Student {student_id} added to course{course_id}'
         return Response(message, status=201)
 
-    def delete(self, student_id: int, course_id: int) -> Response:
+    def delete(self) -> Response:
         """
         This method removes student from the course
         ---
@@ -163,13 +175,22 @@ class StudentCourse(Resource):
             description: Student removed from course successfully
           404:
             description: Student don't assigned to the course
+          422:
+            description: Invalid types in requests
         """
-        if check_student_assigned_to_course(student_id, course_id):
+        try:
+            student_course_ids = StudentCourserRequest(**request.get_json())
+            student_id = student_course_ids.student_id
+            course_id = student_course_ids.course_id
+        except TypeError as exc:
+            return Response(f'Not valid data {exc}', status=422)
+
+        if not check_student_assigned_to_course(student_id, course_id):
             message = (
                 f"Student  {student_id} don't assigned to course {course_id}"
             )
             return Response(message, status=404)
 
         remove_student_from_course(student_id, course_id)
-        message = f'Student {student_id} removed from course{course_id}'
+        message = f'Student {student_id} removed from course {course_id}'
         return Response(message, status=204)

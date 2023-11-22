@@ -4,8 +4,11 @@ import pytest
 import json
 
 
+from app.crud.university import get_student_assigned_to_course
+
+
 def test_less_or_equal_students_in_group(client):
-    response = client.get('/select_group/15')
+    response = client.get(f'/select_group/15')
     assert response.status_code == 200
     data = json.loads(response.data)
     for item in data:
@@ -45,3 +48,47 @@ def test_remove_student(client, student_id):
     response = client.delete(f'/student/{student_id}')
     assert response.status_code == 204
     assert response.data == b''
+
+
+def test_add_student_to_course(client):
+    data = {
+        'student_id': 201,
+        'course_id': 1
+    }
+    response = client.post('/student_to_course', json=data)
+    assert response.status_code == 201
+
+    student_id = data['student_id']
+    course_id = data['course_id']
+    student_course_association = get_student_assigned_to_course(
+        student_id, course_id
+    )
+    assert student_course_association.student_id == student_id
+    assert student_course_association.course_id == course_id
+
+
+def test_add_duplicate_student_to_course(client):
+    data = {
+        'student_id': 201,
+        'course_id': 1
+    }
+    response = client.post('/student_to_course', json=data)
+    assert response.status_code == 409
+
+
+def test_remove_student_from_course(client):
+    data = {
+        'student_id': 201,
+        'course_id': 1
+    }
+    response = client.delete('/student_to_course', json=data)
+    assert response.status_code == 204
+
+
+def test_remove_non_existing_student_course(client):
+    data = {
+        'student_id': 201,
+        'course_id': 1
+    }
+    response = client.delete('/student_to_course', json=data)
+    assert response.status_code == 404
