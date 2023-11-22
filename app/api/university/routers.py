@@ -5,6 +5,7 @@ from flask import (
     request
 )
 from flask_restful import Resource
+from pydantic import ValidationError
 
 from app.api.university.models import (
     StudentRequest,
@@ -98,7 +99,7 @@ class Student(Resource):
         try:
             student = StudentRequest(**request.get_json())
             student_id = add_student(student)
-        except TypeError as exc:
+        except ValidationError as exc:
             return Response(f'Not valid data {exc}', status=422)
 
         return Response(f'id = {student_id}', status=201)
@@ -146,7 +147,7 @@ class StudentCourse(Resource):
             student_course_ids = StudentCourserRequest(**request.get_json())
             student_id = student_course_ids.student_id
             course_id = student_course_ids.course_id
-        except TypeError as exc:
+        except ValidationError as exc:
             return Response(f'Not valid data {exc}', status=422)
 
         if check_student_assigned_to_course(student_id, course_id):
@@ -182,7 +183,7 @@ class StudentCourse(Resource):
             student_course_ids = StudentCourserRequest(**request.get_json())
             student_id = student_course_ids.student_id
             course_id = student_course_ids.course_id
-        except TypeError as exc:
+        except ValidationError as exc:
             return Response(f'Not valid data {exc}', status=422)
 
         if not check_student_assigned_to_course(student_id, course_id):

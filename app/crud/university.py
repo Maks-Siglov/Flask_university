@@ -61,9 +61,9 @@ def get_student(student_id: int) -> Student | None:
 def add_student(student: StudentRequest) -> int:
     """This function insert student to the database"""
     statement = (
-        insert(Student).
-        values(student.to_dict()).
-        returning(Student.id)
+        insert(Student)
+        .values(student.model_dump())
+        .returning(Student.id)
     )
 
     return s.user_db.execute(statement).first()[0]
