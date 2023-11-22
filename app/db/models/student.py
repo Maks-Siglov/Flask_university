@@ -44,11 +44,7 @@ class Student(Base):
             'id': self.id,
             'first_name': self.first_name,
             'last_name': self.last_name,
-            'group': None,
-            'courses': [course.to_dict() for course in self.courses]
         }
-        if self.group:
-            student_dict['group'] = self.group.to_dict()
         return student_dict
 
     def __repr__(self):

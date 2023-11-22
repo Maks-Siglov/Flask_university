@@ -1,6 +1,5 @@
 
 
-import logging
 from contextvars import ContextVar
 from dataclasses import dataclass
 
@@ -15,13 +14,14 @@ from sqlalchemy.orm import (
     sessionmaker,
 )
 
+from app.logger import create_logger
 from app.configs import (
     BASE_URL,
     DB_NAME,
     ENGINE_OPTIONS,
 )
 
-log = logging.getLogger(__name__)
+log = create_logger(__name__)
 
 
 @dataclass
@@ -66,9 +66,9 @@ def _check_connection(engine: Engine) -> None:
     try:
         with engine.connect() as conn:
             conn.execute(select(1))
-            log.warning('Connection success')
+            log.info('Connection success')
     except Exception as e:
-        log.warning('During check connection error occurred')
+        log.info('During check connection error occurred')
         raise SessionExcept(e)
 
 

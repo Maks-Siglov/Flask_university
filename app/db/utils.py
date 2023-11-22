@@ -1,17 +1,16 @@
 
 
-import logging
-
 from sqlalchemy import (
     create_engine,
     text,
 )
 from sqlalchemy.exc import ProgrammingError
 
+from app.logger import create_logger
 from app.db.models.base import Base
 from app.db.session import s
 
-log = logging.getLogger(__name__)
+log = create_logger(__name__)
 
 
 def create_database(db_url: str, db_name: str) -> None:
@@ -20,9 +19,9 @@ def create_database(db_url: str, db_name: str) -> None:
                 db_url, isolation_level='AUTOCOMMIT'
         ).begin() as connect:
             connect.execute(text(f'CREATE DATABASE {db_name}'))
-            log.warning(f'Database {db_name} created')
+            log.info(f'Database {db_name} created')
     except ProgrammingError:
-        log.warning(f'Database {db_name} already exist')
+        log.info(f'Database {db_name} already exist')
 
 
 def drop_database(db_url: str, db_name: str) -> None:
@@ -31,9 +30,9 @@ def drop_database(db_url: str, db_name: str) -> None:
                 db_url, isolation_level='AUTOCOMMIT'
         ).begin() as connect:
             connect.execute(text(f'DROP DATABASE {db_name} WITH(FORCE)'))
-            log.warning(f'Database {db_name} dropped')
+            log.info(f'Database {db_name} dropped')
     except ProgrammingError:
-        log.warning(f"Database {db_name} don't exist")
+        log.info(f"Database {db_name} don't exist")
 
 
 def init_database(db_url: str, db_name: str) -> None:
@@ -42,7 +41,7 @@ def init_database(db_url: str, db_name: str) -> None:
     alembic_config = alembic.config.Config('alembic.ini')
     alembic_config.set_main_option('sqlalchemy.url', f'{db_url}/{db_name}')
     alembic.command.upgrade(alembic_config, 'head')
-    log.warning(f'Alembic upgrade db: {db_url}/{db_name}')
+    log.info(f'Alembic upgrade db: {db_url}/{db_name}')
 
 
 def create_table() -> None:
