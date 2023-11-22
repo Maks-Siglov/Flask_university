@@ -23,11 +23,11 @@ from app.db.session import (
     set_session,
 )
 
-SELECT_GROUP_ROUTE = '/select_group/<int:student_amount>'
-COURSE_STUDENTS_ROUTE = '/course_students/<string:course_name>'
-STUDENT_POST_ROUTE = '/student'
-STUDENT_DELETE_ROUTE = '/student/<int:student_id>'
-STUDENT_TO_COURSE_ROUTE = '/student_to_course'
+SELECT_GROUP_ROUTE = '/api/v1/select_group/<int:student_amount>'
+COURSE_STUDENTS_ROUTE = '/api/v1/course_students/<string:course_name>'
+STUDENT_POST_ROUTE = '/api/v1/student'
+STUDENT_DELETE_ROUTE = '/api/v1/student/<int:student_id>'
+STUDENT_TO_COURSE_ROUTE = '/api/v1/student_to_course'
 
 
 def create_app() -> Flask:
