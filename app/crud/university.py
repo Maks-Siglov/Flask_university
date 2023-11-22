@@ -9,6 +9,8 @@ from sqlalchemy import (
     func,
     insert,
     select,
+    Sequence,
+    Row
 )
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import Select
@@ -27,7 +29,7 @@ log = logging.getLogger(__name__)
 
 def less_or_equal_students_in_group(
         students_amount: int
-) -> list[Group] | None:
+) -> Sequence[Group] | None:
     """This query return groups which has less or equal amount of student then
     the specified argument"""
     statement = (
@@ -108,7 +110,7 @@ def remove_student_from_course(student_id: int, course_id: int) -> None:
 def check_student_assigned_to_course(
         student_id: int,
         course_id: int,
-) -> Union[student_course_association_table, None]:
+) -> Union[Row, None]:
     """This function checks if student assigned to course"""
     statement = _student_to_course_statement(student_id, course_id)
     return s.user_db.scalar(statement)
@@ -117,7 +119,7 @@ def check_student_assigned_to_course(
 def get_student_assigned_to_course(
         student_id: int,
         course_id: int,
-) -> Union[student_course_association_table, None]:
+) -> Union[Row, None]:
     """This function returns student association to course"""
     statement = _student_to_course_statement(student_id, course_id)
     return s.user_db.execute(statement).first()

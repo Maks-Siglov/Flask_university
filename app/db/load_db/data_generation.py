@@ -74,7 +74,7 @@ def _create_groups() -> list[Group]:
 def _generate_group_names() -> set[str]:
     """This function creates random groups name, while cycle and set guarantee
     that group name will be unique and equal to GROUPS_AMOUNT"""
-    groups_name = set()
+    groups_name: set = set()
     while len(groups_name) < GROUPS_AMOUNT:
         groups_name.add(
             f'{"".join(random.choices(string.ascii_uppercase, k=2))}-'
