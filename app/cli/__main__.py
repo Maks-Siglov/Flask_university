@@ -20,7 +20,7 @@ from app.db.utils import (
 @click.option('--recreate', is_flag=True, help='Recreate database')
 @click.option('--load', is_flag=True, help='Insert data to db')
 @click.option('--init', is_flag=True, help='Execute alembic revision')
-def db(
+def cli(
     db_name: str,
     create: bool,
     drop: bool,
@@ -52,4 +52,4 @@ def db(
 
 
 if __name__ == '__main__':
-    db()
+    cli()

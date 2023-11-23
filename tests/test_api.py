@@ -60,16 +60,15 @@ def test_remove_student(client, student_id):
     assert response.data == b''
 
 
+JSON_DATA = {'student_id': 201, 'course_id': 1}
+
+
 def test_add_student_to_course(client):
-    data = {
-        'student_id': 201,
-        'course_id': 1
-    }
-    response = client.post(STUDENT_TO_COURSE_ROUTE, json=data)
+    response = client.post(STUDENT_TO_COURSE_ROUTE, json=JSON_DATA)
     assert response.status_code == 201
 
-    student_id = data['student_id']
-    course_id = data['course_id']
+    student_id = JSON_DATA['student_id']
+    course_id = JSON_DATA['course_id']
     student_course_association = get_student_assigned_to_course(
         student_id, course_id
     )
@@ -78,27 +77,15 @@ def test_add_student_to_course(client):
 
 
 def test_add_duplicate_student_to_course(client):
-    data = {
-        'student_id': 201,
-        'course_id': 1
-    }
-    response = client.post(STUDENT_TO_COURSE_ROUTE, json=data)
+    response = client.post(STUDENT_TO_COURSE_ROUTE, json=JSON_DATA)
     assert response.status_code == 409
 
 
 def test_remove_student_from_course(client):
-    data = {
-        'student_id': 201,
-        'course_id': 1
-    }
-    response = client.delete(STUDENT_TO_COURSE_ROUTE, json=data)
+    response = client.delete(STUDENT_TO_COURSE_ROUTE, json=JSON_DATA)
     assert response.status_code == 204
 
 
 def test_remove_non_existing_student_course(client):
-    data = {
-        'student_id': 201,
-        'course_id': 1
-    }
-    response = client.delete(STUDENT_TO_COURSE_ROUTE, json=data)
+    response = client.delete(STUDENT_TO_COURSE_ROUTE, json=JSON_DATA)
     assert response.status_code == 404

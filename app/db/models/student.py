@@ -40,12 +40,11 @@ class Student(Base):
     )
 
     def to_dict(self) -> dict[str, Any]:
-        student_dict = {
+        return {
             'id': self.id,
             'first_name': self.first_name,
             'last_name': self.last_name,
         }
-        return student_dict
 
     def __repr__(self):
         return (

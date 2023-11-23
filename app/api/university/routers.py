@@ -24,7 +24,7 @@ from app.crud.university import (
 
 
 class SelectGroup(Resource):
-    def get(self, student_amount):
+    def get(self, student_amount: int) -> list[dict[str]]:
         """
         This method retrieves a groups with less or equal student amount
         ---
@@ -48,7 +48,7 @@ class SelectGroup(Resource):
 
 
 class CourseStudents(Resource):
-    def get(self, course_name):
+    def get(self, course_name: str) -> list[dict[str]]:
         """
         This method retrieves students which related to course"
         ---
