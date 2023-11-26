@@ -1,16 +1,13 @@
-
-
 import logging
 
+from app.configs import LOGGER_LEVEL
 
-def create_logger(name: str) -> logging.Logger:
-    logger = logging.getLogger(name)
-    logger.setLevel(level=logging.INFO)
+ROOT_FORMATTER = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+
+
+def logger_config() -> None:
+    logger = logging.getLogger('root')
+    logger.setLevel(level=LOGGER_LEVEL)
     handler = logging.StreamHandler()
-    formatter = logging.Formatter(
-        "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
-    )
-    handler.setFormatter(formatter)
+    handler.setFormatter(logging.Formatter(ROOT_FORMATTER))
     logger.addHandler(handler)
-
-    return logger

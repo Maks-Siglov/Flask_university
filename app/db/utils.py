@@ -1,4 +1,4 @@
-
+import logging
 
 from sqlalchemy import (
     create_engine,
@@ -6,11 +6,10 @@ from sqlalchemy import (
 )
 from sqlalchemy.exc import ProgrammingError
 
-from app.logger import create_logger
 from app.db.models.base import Base
 from app.db.session import s
 
-log = create_logger(__name__)
+log = logging.getLogger(__name__)
 
 
 def create_database(db_url: str, db_name: str) -> None:

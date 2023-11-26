@@ -1,5 +1,3 @@
-
-
 import os
 
 from dotenv import load_dotenv
@@ -32,6 +30,8 @@ else:
 
 ECHO_OPTION = os.getenv('ECHO_OPTION', 1)
 ENGINE_OPTIONS = {'echo': int(ECHO_OPTION)}
+
+LOGGER_LEVEL = os.getenv('LOGGER_LEVEL')
 
 GROUPS_AMOUNT = 10
 STUDENTS_AMOUNT = 200

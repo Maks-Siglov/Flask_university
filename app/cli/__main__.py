@@ -1,5 +1,3 @@
-
-
 import click
 
 from app.configs import BASE_URL, DB_NAME, POSTGRESS_DB

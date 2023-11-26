@@ -1,11 +1,10 @@
-
-
 from typing import Any
 
 from flasgger import Swagger
 from flask import Flask
 from flask_restful import Api
 
+from app.logger import logger_config
 from app.api.university.routers import (
     CourseStudents,
     SelectGroup,
@@ -31,6 +30,7 @@ STUDENT_TO_COURSE_ROUTE = '/api/v1/student_to_course'
 
 
 def create_app() -> Flask:
+    logger_config()
     app = Flask(__name__)
     api = Api(app)
     Swagger(app)

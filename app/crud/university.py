@@ -1,4 +1,4 @@
-
+import logging
 
 from typing import Union
 
@@ -14,7 +14,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import Select
 
-from app.logger import create_logger
 from app.api.university.models import StudentRequest
 from app.db.models import (
     Course,
@@ -24,7 +23,7 @@ from app.db.models import (
 )
 from app.db.session import s
 
-log = create_logger(__name__)
+log = logging.getLogger(__name__)
 
 
 def less_or_equal_students_in_group(

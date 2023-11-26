@@ -1,5 +1,3 @@
-
-
 STUDENT_FIRS_NAMES = [
     'Alice', 'Bob', 'Charlie', 'David', 'Emma', 'Frank', 'Grace', 'Henry',
     'Ivy', 'Jack', 'Katherine', 'Liam', 'Mia', 'Noah', 'Olivia', 'Peter',
