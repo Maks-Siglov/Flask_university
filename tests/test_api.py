@@ -1,7 +1,7 @@
 import pytest
 import json
 
-from app.app import (
+from app.init_routers import (
     STUDENT_POST_ROUTE,
     STUDENT_TO_COURSE_ROUTE,
 )

@@ -61,7 +61,7 @@ def add_student(student: StudentRequest) -> int:
     """This function insert student to the database"""
     statement = (
         insert(Student)
-        .values(student.model_dump())
+        .values(**student.model_dump())
         .returning(Student.id)
     )
 
