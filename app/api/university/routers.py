@@ -23,7 +23,7 @@ from app.crud.university import (
 
 
 class SelectGroup(Resource):
-    def get(self, student_amount: int) -> list[dict[str, Any]]:
+    def get(self, student_amount: int) -> list[dict[str, Any]] | Response:
         """
         This method retrieves a groups with less or equal student amount
         ---
@@ -41,13 +41,17 @@ class SelectGroup(Resource):
                         {'id': 3, 'name': 'CS-11'},
                     ]
                 }
+          404:
+            description: There is no groups with specified amount
         """
         query_result = less_or_equal_students_in_group(student_amount)
+        if not query_result:
+            return Response('There is no group with that amount', 404)
         return [group.to_dict() for group in query_result]
 
 
 class CourseStudents(Resource):
-    def get(self, course_name: str) -> list[dict[str, Any]]:
+    def get(self, course_name: str) -> list[dict[str, Any]] | Response:
         """
         This method retrieves students which related to course"
         ---
@@ -72,8 +76,13 @@ class CourseStudents(Resource):
                           'last_name': 'Jackson'
                         }
                     ]
+          404:
+            description: There is no course with specified name
         """
-        students = course_students(course_name)
+        try:
+            students = course_students(course_name)
+        except AttributeError:
+            return Response(f"Course {course_name} don't exist", 404)
         return [student.to_dict() for student in students]
 
 
@@ -143,9 +152,9 @@ class StudentCourse(Resource):
             description: Invalid types in requests
         """
         try:
-            student_course_ids = StudentCourserRequest(**request.get_json())
-            student_id = student_course_ids.student_id
-            course_id = student_course_ids.course_id
+            student_course_id = StudentCourserRequest(**request.get_json())
+            student_id = student_course_id.student_id
+            course_id = student_course_id.course_id
         except ValidationError as exc:
             return Response(f'Not valid data {exc}', status=422)
 
@@ -179,9 +188,9 @@ class StudentCourse(Resource):
             description: Invalid types in requests
         """
         try:
-            student_course_ids = StudentCourserRequest(**request.get_json())
-            student_id = student_course_ids.student_id
-            course_id = student_course_ids.course_id
+            student_course_id = StudentCourserRequest(**request.get_json())
+            student_id = student_course_id.student_id
+            course_id = student_course_id.course_id
         except ValidationError as exc:
             return Response(f'Not valid data {exc}', status=422)
 

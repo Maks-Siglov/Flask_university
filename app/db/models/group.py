@@ -1,5 +1,3 @@
-
-
 from typing import (
     Any,
     TYPE_CHECKING,
@@ -27,8 +25,19 @@ class Group(Base):
 
     students: Mapped[list['Student']] = relationship(back_populates='group')
 
-    def to_dict(self) -> dict[str, Any]:
-        return {'id': self.id, 'name': self.name}
+    def to_dict(self, exclude: set[str] | None = None) -> dict[str, Any]:
+        if exclude is None:
+            exclude = set()
+        group_dict = {
+            'id': self.id,
+            'name': self.name,
+        }
+        if 'students' not in exclude:
+            group_dict['students'] = [
+                s.to_dict(exclude={'course', 'group'}) for s in self.students
+            ]
 
-    def __repr__(self):
+        return group_dict
+
+    def __repr__(self) -> str:
         return f'Group({self.id}, {self.name})'

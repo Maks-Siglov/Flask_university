@@ -1,5 +1,3 @@
-
-
 from typing import (
     Any,
     TYPE_CHECKING,
@@ -14,7 +12,7 @@ from sqlalchemy.orm import (
 
 from app.db.models.base import Base
 from app.db.models.student_course_association import (
-    student_course_association_table
+     StudentCourseAssociationTable
 )
 
 if TYPE_CHECKING:
@@ -36,17 +34,28 @@ class Student(Base):
     group: Mapped['Group'] = relationship(back_populates='students')
 
     courses: Mapped[list['Course']] = relationship(
-        secondary=student_course_association_table, back_populates='students'
+        secondary=StudentCourseAssociationTable.__table__,
+        back_populates='students'
     )
 
-    def to_dict(self) -> dict[str, Any]:
-        return {
+    def to_dict(self, exclude: set[str] | None = None) -> dict[str, Any]:
+        if exclude is None:
+            exclude = set()
+        student_dict = {
             'id': self.id,
             'first_name': self.first_name,
             'last_name': self.last_name,
         }
+        if 'group' not in exclude:
+            student_dict['group'] = self.group.to_dict(exclude={'students'})
+        if 'course' not in exclude:
+            student_dict['courses'] = [
+                course.to_dict(exclude={'students'}) for course in self.courses
+            ]
 
-    def __repr__(self):
+        return student_dict
+
+    def __repr__(self) -> str:
         return (
             f'Student({self.id},'
             f' {self.first_name},'

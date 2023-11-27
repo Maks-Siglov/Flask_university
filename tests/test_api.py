@@ -61,7 +61,7 @@ def test_remove_student(client, student_id):
 JSON_DATA = {'student_id': 201, 'course_id': 1}
 
 
-def test_add_student_to_course(client):
+def test_add_student_to_course(client, add_201_id_student):
     response = client.post(STUDENT_TO_COURSE_ROUTE, json=JSON_DATA)
     assert response.status_code == 201
 
@@ -70,8 +70,8 @@ def test_add_student_to_course(client):
     student_course_association = get_student_assigned_to_course(
         student_id, course_id
     )
-    assert student_course_association.student_id == student_id
-    assert student_course_association.course_id == course_id
+    assert student_course_association[0].student_id == student_id
+    assert student_course_association[0].course_id == course_id
 
 
 def test_add_duplicate_student_to_course(client):

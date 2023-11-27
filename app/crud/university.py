@@ -11,7 +11,7 @@ from sqlalchemy import (
     Sequence,
     Row
 )
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import joinedload
 from sqlalchemy.sql import Select
 
 from app.api.university.models import StudentRequest
@@ -19,7 +19,7 @@ from app.db.models import (
     Course,
     Group,
     Student,
-    student_course_association_table,
+    StudentCourseAssociationTable,
 )
 from app.db.session import s
 
@@ -34,7 +34,7 @@ def less_or_equal_students_in_group(
     statement = (
         select(Group)
         .join(Group.students)
-        .group_by(Group.id)
+        .group_by(Group.id, Student.id)
         .having(func.count(Group.students) <= students_amount)
     )
     return s.user_db.scalars(statement).all()
@@ -44,7 +44,7 @@ def course_students(course_name: str) -> list[Student]:
     """This query return students which related to course"""
     statement = (
         select(Course)
-        .options(selectinload(Course.students))
+        .options(joinedload(Course.students))
         .where(Course.name == course_name)
     )
     course = s.user_db.scalar(statement)
@@ -72,8 +72,8 @@ def delete_student(student_id: int) -> None:
     """At first function deletes student association with courses, after
     delete student itself"""
     delete_association_statement = (
-        delete(student_course_association_table)
-        .where(student_course_association_table.c.student_id == student_id)
+        delete(StudentCourseAssociationTable)
+        .where(StudentCourseAssociationTable.student_id == student_id)
     )
     s.user_db.execute(delete_association_statement)
 
@@ -85,7 +85,7 @@ def add_student_to_course(student_id: int, course_id: int) -> None:
     """This function take course from database by course_name and insert
     student to it"""
     insert_statement = (
-        insert(student_course_association_table)
+        insert(StudentCourseAssociationTable)
         .values(student_id=student_id, course_id=course_id)
     )
 
@@ -96,10 +96,10 @@ def remove_student_from_course(student_id: int, course_id: int) -> None:
     """This function take course from database by course_name then removes
     student from course"""
     delete_statement = (
-        delete(student_course_association_table)
+        delete(StudentCourseAssociationTable)
         .where(and_(
-            student_course_association_table.c.student_id == student_id,
-            student_course_association_table.c.course_id == course_id
+            StudentCourseAssociationTable.student_id == student_id,
+            StudentCourseAssociationTable.course_id == course_id
         ))
     )
 
@@ -126,9 +126,9 @@ def get_student_assigned_to_course(
 
 def _student_to_course_statement(student_id: int, course_id: int,) -> Select:
     return (
-        select(student_course_association_table)
+        select(StudentCourseAssociationTable)
         .where(and_(
-            student_course_association_table.c.student_id == student_id,
-            student_course_association_table.c.course_id == course_id
+            StudentCourseAssociationTable.student_id == student_id,
+            StudentCourseAssociationTable.course_id == course_id
         ))
     )
