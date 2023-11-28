@@ -46,7 +46,7 @@ class Student(Base):
             'first_name': self.first_name,
             'last_name': self.last_name,
         }
-        if 'group' not in exclude:
+        if 'group' not in exclude and self.group:
             student_dict['group'] = self.group.to_dict(exclude={'students'})
         if 'course' not in exclude:
             student_dict['courses'] = [

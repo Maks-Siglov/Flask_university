@@ -35,7 +35,7 @@ STUDENT_WITHOUT_COURSE = {
 }
 
 
-def load_test_db():
+def load_test_db() -> None:
     course_one = Course(**COURSE_ONE)
     course_two = Course(**COURSE_TWO)
     course_without_student = Course(**COURSE_WITHOUT_STUDENT)
@@ -61,6 +61,3 @@ def load_test_db():
             course_without_student, student_three, group_without_students
         ]
     )
-
-
-
