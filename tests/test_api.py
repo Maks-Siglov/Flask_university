@@ -21,7 +21,7 @@ def test_less_or_equal_students_in_group(client, student_amount):
 
 
 def test_404_group(client):
-    response = client.get(f'/api/v1/select_group/0')
+    response = client.get('/api/v1/select_group/0')
     assert response.status_code == 404
 
 
@@ -40,7 +40,7 @@ def test_course_students(client, course_name):
 
 
 def test_non_exist_course(client):
-    response = client.get(f'/api/v1/course_students/non_exist_course')
+    response = client.get('/api/v1/course_students/non_exist_course')
     assert response.status_code == 404
 
 
