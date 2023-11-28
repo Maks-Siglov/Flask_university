@@ -19,6 +19,7 @@ from app.db.utils import (
     create_table,
     drop_database,
 )
+from tests.data_for_test_db import load_test_db
 
 BASE_SUPERUSER_URL = f'{BASE_URL}/{POSTGRESS_DB}'
 
@@ -33,18 +34,12 @@ def client(app):
     return app.test_client()
 
 
-@pytest.fixture(scope='session')
-def add_201_id_student():
-    student = Student(first_name='test_name', last_name='test_last_name')
-    s.user_db.add(student)
-
-
 @pytest.hookimpl(tryfirst=True)
 def pytest_sessionstart(session):
     create_database(BASE_SUPERUSER_URL, DB_NAME)
     set_session()
     create_table()
-    load_db()
+    load_test_db()
     pop_session()
 
 

@@ -1,5 +1,3 @@
-import logging
-
 from typing import Union
 
 from sqlalchemy import (
@@ -22,8 +20,6 @@ from app.db.models import (
     StudentCourseAssociationTable,
 )
 from app.db.session import s
-
-log = logging.getLogger(__name__)
 
 
 def less_or_equal_students_in_group(
@@ -53,7 +49,11 @@ def course_students(course_name: str) -> list[Student]:
 
 def get_student(student_id: int) -> Student | None:
     """This function return student by it id, None if not exist"""
-    statement = select(Student).where(Student.id == student_id)
+    statement = (
+        select(Student)
+        .options(joinedload(Student.courses), joinedload(Student.group))
+        .where(Student.id == student_id)
+    )
     return s.user_db.scalar(statement)
 
 
@@ -107,18 +107,16 @@ def remove_student_from_course(student_id: int, course_id: int) -> None:
 
 
 def check_student_assigned_to_course(
-        student_id: int,
-        course_id: int,
-) -> Union[Row, None]:
+        student_id: int, course_id: int,
+) -> Row | None:
     """This function checks if student assigned to course"""
     statement = _student_to_course_statement(student_id, course_id)
     return s.user_db.scalar(statement)
 
 
 def get_student_assigned_to_course(
-        student_id: int,
-        course_id: int,
-) -> Union[Row, None]:
+        student_id: int, course_id: int
+) -> Row | None:
     """This function returns student association to course"""
     statement = _student_to_course_statement(student_id, course_id)
     return s.user_db.execute(statement).first()
