@@ -1,11 +1,12 @@
 from flask_restful import Api
 
-from app.api.university.routers import (
+from app.api.university.endpoints.group import SelectGroup
+from app.api.university.endpoints.student import Student
+from app.api.university.endpoints.course import (
     CourseStudents,
-    SelectGroup,
-    Student,
     StudentCourse,
 )
+
 
 SELECT_GROUP_ROUTE = '/api/v1/select_group/<int:student_amount>'
 COURSE_STUDENTS_ROUTE = '/api/v1/course_students/<string:course_name>'

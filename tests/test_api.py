@@ -5,7 +5,7 @@ from app.init_routers import (
     STUDENT_POST_ROUTE,
     STUDENT_TO_COURSE_ROUTE,
 )
-from app.crud.university import get_student_assigned_to_course
+from app.crud.university import check_student_assigned_to_course
 
 test_select_case = [5, 10, 15]
 
@@ -85,11 +85,11 @@ def test_add_student_to_course(client):
 
     student_id = ADD_STUDENT_TO_COURSE['student_id']
     course_id = ADD_STUDENT_TO_COURSE['course_id']
-    student_course_association = get_student_assigned_to_course(
+    student_course_association = check_student_assigned_to_course(
         student_id, course_id
     )
-    assert student_course_association[0].student_id == student_id
-    assert student_course_association[0].course_id == course_id
+    assert student_course_association.student_id == student_id
+    assert student_course_association.course_id == course_id
 
 
 ADD_DUPLICATE_STUDENT = {'student_id': 1, 'course_id': 1}

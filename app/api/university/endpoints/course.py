@@ -6,48 +6,13 @@ from flask import (
 from flask_restful import Resource
 from pydantic import ValidationError
 
-from app.api.university.models import (
-    StudentRequest,
-    StudentCourserRequest
-)
+from app.api.university.models import StudentCourserRequest
 from app.crud.university import (
-    add_student,
     add_student_to_course,
     course_students,
-    delete_student,
-    less_or_equal_students_in_group,
     remove_student_from_course,
     check_student_assigned_to_course,
-    get_student,
 )
-
-
-class SelectGroup(Resource):
-    def get(self, student_amount: int) -> list[dict[str, Any]] | Response:
-        """
-        This method retrieves a groups with less or equal student amount
-        ---
-        parameters:
-          - name: student_amount
-            in: path
-            type: int
-
-        responses:
-          200:
-            description: Returns groups with less or equal student amount
-            examples: {
-                    'application/json': [
-                        {'id': 9, 'name': 'TT-23'},
-                        {'id': 3, 'name': 'CS-11'},
-                    ]
-                }
-          404:
-            description: There is no groups with specified amount
-        """
-        query_result = less_or_equal_students_in_group(student_amount)
-        if not query_result:
-            return Response('There is no group with that amount', 404)
-        return [group.to_dict() for group in query_result]
 
 
 class CourseStudents(Resource):
@@ -84,51 +49,6 @@ class CourseStudents(Resource):
         except AttributeError:
             return Response(f"Course {course_name} don't exist", 404)
         return [student.to_dict() for student in students]
-
-
-class Student(Resource):
-    def post(self) -> Response:
-        """
-        This method add a new student to the database
-        ---
-        parameters:
-          - name: first_name
-            in: query
-            type: string
-          - name: last_name
-            in: query
-            type: string
-        responses:
-          201:
-            description: Student added successfully
-          422:
-            description: Invalid types in requests
-        """
-        try:
-            student = StudentRequest(**request.get_json())
-            student_id = add_student(student)
-        except ValidationError as exc:
-            return Response(f'Not valid data {exc}', status=422)
-
-        return Response(f'id = {student_id}', status=201)
-
-    def delete(self, student_id: int) -> Response:
-        """
-        This method remove student from database by student_id
-        ---
-        parameters:
-          - name: student_id
-            in: query
-            type: int
-        responses:
-          204:
-            description: Student removed successfully
-        """
-        if not get_student(student_id):
-            return Response(f"Student {student_id} don't exist", status=404)
-
-        delete_student(student_id)
-        return Response(None, status=204)
 
 
 class StudentCourse(Resource):

@@ -8,7 +8,6 @@ from sqlalchemy import (
     Row
 )
 from sqlalchemy.orm import joinedload
-from sqlalchemy.sql import Select
 
 from app.api.university.models import StudentRequest
 from app.db.models import (
@@ -22,7 +21,7 @@ from app.db.session import s
 
 def less_or_equal_students_in_group(
         students_amount: int
-) -> Sequence[Group] | None:
+) -> Sequence[Group]:
     """This query return groups which has less or equal amount of student then
     the specified argument"""
     statement = (
@@ -63,18 +62,12 @@ def add_student(student: StudentRequest) -> int:
         .returning(Student.id)
     )
 
-    return s.user_db.execute(statement).first()[0]
+    return s.user_db.scalar(statement)
 
 
 def delete_student(student_id: int) -> None:
     """At first function deletes student association with courses, after
     delete student itself"""
-    delete_association_statement = (
-        delete(StudentCourseAssociationTable)
-        .where(StudentCourseAssociationTable.student_id == student_id)
-    )
-    s.user_db.execute(delete_association_statement)
-
     delete_statement = delete(Student).where(Student.id == student_id)
     s.user_db.execute(delete_statement)
 
@@ -108,23 +101,12 @@ def check_student_assigned_to_course(
         student_id: int, course_id: int,
 ) -> Row | None:
     """This function checks if student assigned to course"""
-    statement = _student_to_course_statement(student_id, course_id)
-    return s.user_db.scalar(statement)
-
-
-def get_student_assigned_to_course(
-        student_id: int, course_id: int
-) -> Row | None:
-    """This function returns student association to course"""
-    statement = _student_to_course_statement(student_id, course_id)
-    return s.user_db.execute(statement).first()
-
-
-def _student_to_course_statement(student_id: int, course_id: int,) -> Select:
-    return (
+    statement = (
         select(StudentCourseAssociationTable)
         .where(and_(
             StudentCourseAssociationTable.student_id == student_id,
             StudentCourseAssociationTable.course_id == course_id
         ))
     )
+
+    return s.user_db.scalar(statement)
