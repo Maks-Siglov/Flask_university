@@ -33,7 +33,7 @@ def less_or_equal_students_in_group(
     return s.user_db.scalars(statement).all()
 
 
-def course_students(course_name: str) -> list[Student]:
+def course_students(course_name: str) -> list[Student] | None:
     """This query return students which related to course"""
     statement = (
         select(Course)
@@ -99,7 +99,7 @@ def remove_student_from_course(student_id: int, course_id: int) -> None:
 
 def check_student_assigned_to_course(
         student_id: int, course_id: int,
-) -> Row | None:
+) -> StudentCourseAssociationTable | None:
     """This function checks if student assigned to course"""
     statement = (
         select(StudentCourseAssociationTable)
