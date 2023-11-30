@@ -1,3 +1,4 @@
+from typing import Any
 from flask import (
     Response,
     request
@@ -7,7 +8,7 @@ from pydantic import ValidationError
 
 from app.api.university.models import StudentRequest
 
-from app.crud.university import (
+from app.crud.university.student import (
     add_student,
     delete_student,
     get_student,
@@ -15,7 +16,7 @@ from app.crud.university import (
 
 
 class Student(Resource):
-    def get(self, student_id: int) -> Response | dict:
+    def get(self, student_id: int) -> Response | dict[str, Any]:
         """
         This method return data about student by it id
         ---
@@ -56,10 +57,10 @@ class Student(Resource):
         ---
         parameters:
           - name: first_name
-            in: query
+            in: body
             type: string
           - name: last_name
-            in: query
+            in: body
             type: string
         responses:
           201:
@@ -71,7 +72,7 @@ class Student(Resource):
             student = StudentRequest(**request.get_json())
             student_id = add_student(student)
         except ValidationError as exc:
-            return Response(f'Not valid data {exc}', status=422)
+            return Response(f'Not valid data, {exc}', status=422)
 
         return Response(f'id = {student_id}', status=201)
 
@@ -86,6 +87,8 @@ class Student(Resource):
         responses:
           204:
             description: Student removed successfully
+          404:
+            description: Student don't exist
         """
         if not get_student(student_id):
             return Response(f"Student {student_id} don't exist", status=404)

@@ -29,7 +29,7 @@ class Student(Base):
     last_name: Mapped[str] = mapped_column()
 
     group_id: Mapped[int] = mapped_column(
-        ForeignKey('groups.id', ondelete='RESTRICT'), nullable=True
+        ForeignKey('groups.id', ondelete='SET NULL'), nullable=True
     )
     group: Mapped['Group'] = relationship(back_populates='students')
 

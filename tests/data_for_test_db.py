@@ -16,9 +16,9 @@ COURSE_WITHOUT_STUDENT = {
 }
 
 
-Group_ONE = {'id': 1, 'name': 'TT-31'}
-GROUT_TWO = {'id': 2, 'name': 'FF-22'}
-GROUT_WITHOUT_STUDENT = {'id': 3, 'name': 'AG-73'}
+Group_ONE = {'name': 'TT-31'}
+GROUT_TWO = {'name': 'FF-22'}
+GROUT_WITHOUT_STUDENT = {'name': 'AG-73'}
 
 
 STUDENT_ONE = {

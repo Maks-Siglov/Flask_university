@@ -7,7 +7,7 @@ from flask_restful import Resource
 from pydantic import ValidationError
 
 from app.api.university.models import StudentCourserRequest
-from app.crud.university import (
+from app.crud.university.course import (
     add_student_to_course,
     course_students,
     remove_student_from_course,
@@ -51,18 +51,18 @@ class CourseStudents(Resource):
         return [student.to_dict() for student in students]
 
 
-class StudentCourse(Resource):
+class StudentToCourse(Resource):
     def post(self) -> Response:
         """
         This method add student to the course
         ---
         parameters:
           - name: student_id
-            in: query
+            in: body
             type: int
-          - name: course
-            in: query
-            type: string
+          - name: course_id
+            in: body
+            type: int
         responses:
           201:
             description: Student added to course successfully
@@ -85,8 +85,8 @@ class StudentCourse(Resource):
             return Response(message, status=409)
 
         add_student_to_course(student_id, course_id)
-        message = f'Student {student_id} added to course{course_id}'
-        return Response(message, status=201)
+        response_message = f'Student {student_id} added to course{course_id}'
+        return Response(response_message, status=201)
 
     def delete(self) -> Response:
         """
@@ -94,11 +94,11 @@ class StudentCourse(Resource):
         ---
         parameters:
           - name: student_id
-            in: path
+            in: body
             type: int
           - name: course_id
-            in: path
-            type: id
+            in: body
+            type: int
         responses:
           204:
             description: Student removed from course successfully
