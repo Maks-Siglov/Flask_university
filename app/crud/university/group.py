@@ -84,6 +84,7 @@ def remove_student_from_group(student_id: int) -> None:
     )
     s.user_db.execute(statement)
 
+
 def check_student_assigned_to_group(
         student_id: int, group_id: int
 ) -> Student | None:

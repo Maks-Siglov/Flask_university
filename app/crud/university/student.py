@@ -1,19 +1,12 @@
 from sqlalchemy import (
-    and_,
     delete,
-    func,
     insert,
     select,
-    Sequence,
 )
 from sqlalchemy.orm import joinedload
 
 from app.api.university.models import StudentRequest
-from app.db.models import (
-    Course,
-    Group,
-    Student,
-)
+from app.db.models import Student
 from app.db.session import s
 
 

@@ -54,6 +54,14 @@ def test_remove_student_from_course(client):
     response = client.delete(STUDENT_TO_COURSE_ROUTE, json=REMOVE_FROM_COURSE)
     assert response.status_code == 204
 
+    student_id = REMOVE_FROM_COURSE['student_id']
+    course_id = REMOVE_FROM_COURSE['course_id']
+    student_course_association = check_student_assigned_to_course(
+        student_id, course_id
+    )
+
+    assert student_course_association is None
+
 
 def test_remove_non_existing_student_course(client):
     response = client.delete(STUDENT_TO_COURSE_ROUTE, json=REMOVE_FROM_COURSE)

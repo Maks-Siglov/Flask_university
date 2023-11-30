@@ -151,7 +151,7 @@ class StudentToGroup(Resource):
             return Response(f'Not valid data {exc}', status=422)
 
         if check_student_assigned_to_group(student_id, group_id):
-            return Response(f'Student already assigned to group', status=409)
+            return Response('Student already assigned to group', status=409)
 
         add_student_to_group(student_id, group_id)
         response_message = f'Student {student_id} added to group {group_id}'
@@ -184,8 +184,10 @@ class StudentToGroup(Resource):
             return Response(f'Not valid data {exc}', status=422)
 
         if not check_student_assigned_to_group(student_id, group_id):
-            return Response(f"Student don't assigned to group", status=409)
+            return Response("Student don't assigned to group", status=409)
 
         remove_student_from_group(student_id)
-        response_message = f'Student {student_id} removed from group {group_id}'
+        response_message = (
+            f'Student {student_id} removed from group {group_id}'
+        )
         return Response(response_message, status=204)

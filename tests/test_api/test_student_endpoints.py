@@ -1,5 +1,4 @@
 import pytest
-import json
 
 from app.init_routers import STUDENT_POST_ROUTE
 

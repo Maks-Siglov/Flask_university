@@ -1,11 +1,11 @@
 import pytest
 import json
 
+from app.crud.university.group import check_student_assigned_to_group
 from app.init_routers import (
     GROUP_POST_ROUTE,
     STUDENT_TO_GROUP_ROUTE,
 )
-from app.crud.university.group import check_student_assigned_to_group
 
 test_select_case = [5, 10, 15]
 
@@ -52,3 +52,37 @@ def test_delete_group(client):
     response = client.delete('/api/v1/group/5')
     assert response.status_code == 204
     assert response.data == b''
+
+
+ADD_STUDENT_TO_GROUP = {'student_id': 1, 'group_id': 3}
+
+
+def test_add_student_to_group(client):
+    response = client.post(STUDENT_TO_GROUP_ROUTE, json=ADD_STUDENT_TO_GROUP)
+    assert response.status_code == 201
+
+    student_id = ADD_STUDENT_TO_GROUP['student_id']
+    group_id = ADD_STUDENT_TO_GROUP['group_id']
+    student_group_association = check_student_assigned_to_group(
+        student_id, group_id
+    )
+
+    assert student_group_association.group_id == group_id
+
+
+REMOVE_STUDENT_FROM_GROUP = {'student_id': 1, 'group_id': 3}
+
+
+def test_remove_student_from_group(client):
+    response = client.delete(
+        STUDENT_TO_GROUP_ROUTE, json=REMOVE_STUDENT_FROM_GROUP
+    )
+    assert response.status_code == 204
+
+    student_id = REMOVE_STUDENT_FROM_GROUP['student_id']
+    group_id = REMOVE_STUDENT_FROM_GROUP['group_id']
+    student_group_association = check_student_assigned_to_group(
+        student_id, group_id
+    )
+
+    assert student_group_association is None
