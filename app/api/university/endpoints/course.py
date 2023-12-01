@@ -10,6 +10,7 @@ from app.api.university.models import StudentCourserRequest, CourseRequest
 from app.crud.university.course import (
     get_course,
     add_course,
+    update_course,
     delete_course,
     get_all_courses,
     add_student_to_course,
@@ -125,6 +126,37 @@ class Course(Resource):
             return Response(f'Not valid data, {exc}', status=422)
 
         return Response(f'id = {course_id}', status=201)
+
+    def patch(self, course_id: int):
+        """
+        This method update course in the database by course_id
+        ---
+        parameters:
+          - name: course_id
+            in: path
+            type: int
+        responses:
+          200:
+            description: Course updated successfully
+          404:
+            description: Course don't exist
+          422:
+            description: Not valid data for updating
+        """
+        course = get_course(course_id)
+        if not course:
+            return Response(f"Course with id {course_id} doesn't exist", 404)
+
+        try:
+            data = request.get_json()
+            CourseRequest(**data)
+        except ValidationError as exc:
+            return Response(f'Not valid data, {exc}', status=422)
+
+        update_course(course_id, data)
+        return Response(
+            f'Course with id {course_id} updated successfully', status=200
+        )
 
     def delete(self, course_id: int):
         """

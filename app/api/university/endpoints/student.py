@@ -11,6 +11,7 @@ from app.api.university.models import StudentRequest
 from app.crud.university.student import (
     get_all_students,
     add_student,
+    update_student,
     delete_student,
     get_student,
 )
@@ -93,6 +94,37 @@ class Student(Resource):
             return Response(f'Not valid data, {exc}', status=422)
 
         return Response(f'id = {student_id}', status=201)
+
+    def patch(self, student_id: int):
+        """
+        This method update student in the database by student_id
+        ---
+        parameters:
+          - name: student_id
+            in: path
+            type: int
+        responses:
+          200:
+            description: Student updated successfully
+          404:
+            description: Student don't exist
+          422:
+            description: Not valid data for updating
+        """
+        student = get_student(student_id)
+        if not student:
+            return Response(f"Student with id {student_id} doesn't exist", 404)
+
+        try:
+            data = request.get_json()
+            StudentRequest(**data)
+        except ValidationError as exc:
+            return Response(f'Not valid data, {exc}', status=422)
+
+        update_student(student_id, data)
+        return Response(
+            f'Student with id {student_id} updated successfully', status=200
+        )
 
     def delete(self, student_id: int) -> Response:
         """

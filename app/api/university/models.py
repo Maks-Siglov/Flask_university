@@ -1,9 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class StudentRequest(BaseModel):
-    first_name: str
-    last_name: str
+    first_name: str = Field(default='Default first name')
+    last_name: str = Field(default='Default last name')
 
 
 class GroupRequest(BaseModel):
@@ -11,8 +11,8 @@ class GroupRequest(BaseModel):
 
 
 class CourseRequest(BaseModel):
-    name: str
-    description: str
+    name: str = Field(default='Default name')
+    description: str = Field(default='Default description')
 
 
 class StudentGroupRequest(BaseModel):

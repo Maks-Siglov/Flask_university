@@ -15,6 +15,7 @@ from app.crud.university.group import (
     get_all_groups,
     get_group,
     add_group,
+    update_group,
     delete_group,
     check_student_assigned_to_group,
     add_student_to_group,
@@ -119,6 +120,37 @@ class Group(Resource):
             return Response(f'Not valid data, {exc}', status=422)
 
         return Response(f'id = {group_id}', status=201)
+
+    def patch(self, group_id: int):
+        """
+        This method update group in the database by group_id
+        ---
+        parameters:
+          - name: group_id
+            in: path
+            type: int
+        responses:
+          200:
+            description: Group updated successfully
+          404:
+            description: Group don't exist
+          422:
+            description: Not valid data for updating
+        """
+        group = get_group(group_id)
+        if not group:
+            return Response(f"Group with id {group_id} doesn't exist", 404)
+
+        try:
+            data = request.get_json()
+            GroupRequest(**data)
+        except ValidationError as exc:
+            return Response(f'Not valid data, {exc}', status=422)
+
+        update_group(group_id, data)
+        return Response(
+            f'Group with id {group_id} updated successfully', status=200
+        )
 
     def delete(self, group_id: int):
         """

@@ -61,6 +61,16 @@ def add_group(group: GroupRequest) -> int:
     return s.user_db.scalar(statement)
 
 
+def update_group(grop_id: int, data: dict[str, str]) -> None:
+    """This function updates group by provided data"""
+    statement = (
+        update(Group)
+        .where(Group.id == grop_id)
+        .values(data)
+    )
+    s.user_db.execute(statement)
+
+
 def delete_group(group_id: int) -> None:
     """This function delete group from database"""
     delete_statement = (

@@ -1,4 +1,5 @@
 from sqlalchemy import (
+    update,
     delete,
     insert,
     select,
@@ -40,6 +41,16 @@ def add_student(student: StudentRequest) -> int:
     )
 
     return s.user_db.scalar(statement)
+
+
+def update_student(student_id: int, data: dict[str, str]) -> None:
+    """This function update student by provided data"""
+    statement = (
+        update(Student)
+        .where(Student.id == student_id)
+        .values(data)
+    )
+    s.user_db.execute(statement)
 
 
 def delete_student(student_id: int) -> None:
