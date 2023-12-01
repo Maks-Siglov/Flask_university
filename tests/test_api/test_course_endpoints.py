@@ -3,7 +3,10 @@ import json
 
 from app.configs import API_PREFIX
 from app.init_routers import STUDENT_TO_COURSE_ROUTE
-from app.crud.university.course import check_student_assigned_to_course
+from app.crud.university.course import (
+    check_student_assigned_to_course,
+    get_course
+)
 
 STUDENT_TO_COURSE_ROUTE = f'{API_PREFIX}{STUDENT_TO_COURSE_ROUTE}'
 
@@ -24,6 +27,21 @@ def test_course_students(client, course_name):
 def test_non_exist_course(client):
     response = client.get('/api/v1/course_students/non_exist_course')
     assert response.status_code == 404
+
+
+UPDATE_COURSE_JSON = {'name': 'Math', 'description': 'Fundamental of Math'}
+update_course_id_case = [1]
+
+
+@pytest.mark.parametrize('course_id', update_course_id_case)
+def test_update_course(client, course_id):
+    response = client.patch(
+        f'api/v1/course/{course_id}', json=UPDATE_COURSE_JSON
+    )
+    assert response.status_code == 200
+    updated_course = get_course(course_id)
+    assert updated_course.name == 'Math'
+    assert updated_course.description == 'Fundamental of Math'
 
 
 ADD_STUDENT_TO_COURSE = {'student_id': 4, 'course_id': 3}

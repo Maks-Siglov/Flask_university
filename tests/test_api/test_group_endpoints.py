@@ -2,7 +2,10 @@ import pytest
 import json
 
 from app.configs import API_PREFIX
-from app.crud.university.group import check_student_assigned_to_group
+from app.crud.university.group import (
+    check_student_assigned_to_group,
+    get_group,
+)
 from app.init_routers import (
     GROUP_POST_ROUTE,
     STUDENT_TO_GROUP_ROUTE,
@@ -50,6 +53,20 @@ def test_add_group(client, group_name):
     response = client.post(GROUP_POST_ROUTE, json=data)
     assert response.status_code == 201
     assert 'id'.encode() in response.data
+
+
+UPDATE_GROUP_JSON = {'name': 'TT-41'}
+update_group_id_case = [1]
+
+
+@pytest.mark.parametrize('group_id', update_group_id_case)
+def test_update_group(client, group_id):
+    response = client.patch(
+        f'api/v1/group/{group_id}', json=UPDATE_GROUP_JSON
+    )
+    assert response.status_code == 200
+    updated_course = get_group(group_id)
+    assert updated_course.name == 'TT-41'
 
 
 def test_delete_group(client):
