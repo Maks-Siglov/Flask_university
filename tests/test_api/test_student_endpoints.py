@@ -23,7 +23,9 @@ def test_add_student(client, first_name, last_name):
     assert 'id'.encode() in response.data
 
 
-UPDATE_STUDENT_JSON = {'first_name': 'test_name', 'last_name': 'test_last_name'}
+UPDATE_STUDENT_JSON = {
+    'first_name': 'test_name', 'last_name': 'test_last_name'
+}
 update_student_id_case = [2, 3]
 
 
