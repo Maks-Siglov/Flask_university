@@ -12,6 +12,7 @@ from app.api.university.models import (
 )
 from app.crud.university.group import (
     less_or_equal_students_in_group,
+    get_all_groups,
     get_group,
     add_group,
     delete_group,
@@ -47,6 +48,23 @@ class GroupStudentAmount(Resource):
         if not query_result:
             return Response('There is no group with that amount', 404)
         return [group.to_dict(exclude={'students'}) for group in query_result]
+
+
+class Groups(Resource):
+    def get(self) -> list[dict[str, Any]] | Response:
+        """
+        This method returns all groups with their students
+        ---
+        responses:
+          200:
+            description: returns all groups
+          204:
+            description: there is no groups
+        """
+        groups = get_all_groups()
+        if not groups:
+            return Response([], 204)
+        return [group.to_dict() for group in groups]
 
 
 class Group(Resource):

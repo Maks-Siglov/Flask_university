@@ -9,10 +9,28 @@ from pydantic import ValidationError
 from app.api.university.models import StudentRequest
 
 from app.crud.university.student import (
+    get_all_students,
     add_student,
     delete_student,
     get_student,
 )
+
+
+class Students(Resource):
+    def get(self) -> list[dict[str, Any]] | Response:
+        """
+        This method returns all students with their courses and groups
+        ---
+        responses:
+          200:
+            description: returns all students with their relations
+          204:
+            description: there is no students
+        """
+        students = get_all_students()
+        if not students:
+            return Response([], 204)
+        return [student.to_dict() for student in students]
 
 
 class Student(Resource):

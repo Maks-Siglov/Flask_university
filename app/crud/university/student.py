@@ -10,6 +10,17 @@ from app.db.models import Student
 from app.db.session import s
 
 
+def get_all_students() -> list[Student]:
+    """This function returns all students"""
+    statement = (
+        select(Student).options(
+            joinedload(Student.group),
+            joinedload(Student.courses)
+        )
+    )
+    return s.user_db.scalars(statement).unique().all()
+
+
 def get_student(student_id: int) -> Student | None:
     """This function return student by it id, None if not exist"""
     statement = (

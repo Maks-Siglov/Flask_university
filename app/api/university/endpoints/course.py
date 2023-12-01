@@ -8,6 +8,7 @@ from pydantic import ValidationError
 
 from app.api.university.models import StudentCourserRequest
 from app.crud.university.course import (
+    get_all_courses,
     add_student_to_course,
     course_students,
     remove_student_from_course,
@@ -49,6 +50,23 @@ class CourseStudents(Resource):
         except AttributeError:
             return Response(f"Course {course_name} don't exist", 404)
         return [student.to_dict() for student in students]
+
+
+class Courses(Resource):
+    def get(self) -> list[dict[str, Any]] | Response:
+        """
+        This method returns all courses with their students
+        ---
+        responses:
+          200:
+            description: returns all courses
+          204:
+            description: there is no courses
+        """
+        courses = get_all_courses()
+        if not courses:
+            return Response([], 204)
+        return [course.to_dict() for course in courses]
 
 
 class StudentToCourse(Resource):

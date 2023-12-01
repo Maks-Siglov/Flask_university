@@ -14,8 +14,18 @@ from app.db.models import (
 from app.db.session import s
 
 
+def get_all_courses() -> list[Course]:
+    """This function returns all courses"""
+    statement = (
+        select(Course).options(
+            joinedload(Course.students)
+        )
+    )
+    return s.user_db.scalars(statement).unique().all()
+
+
 def course_students(course_name: str) -> list[Student] | None:
-    """This query return students which related to course"""
+    """This function return students which related to course"""
     statement = (
         select(Course)
         .options(joinedload(Course.students))

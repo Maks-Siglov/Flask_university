@@ -17,6 +17,16 @@ from app.db.models import (
 from app.db.session import s
 
 
+def get_all_groups() -> list[Group]:
+    """This function returns all groups"""
+    statement = (
+        select(Group).options(
+            joinedload(Group.students)
+        )
+    )
+    return s.user_db.scalars(statement).unique().all()
+
+
 def less_or_equal_students_in_group(
         students_amount: int
 ) -> Sequence[Group]:
