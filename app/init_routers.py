@@ -17,21 +17,19 @@ from app.api.university.endpoints.course import (
 )
 
 
-GROUP_STUDENTS_AMOUNT_ROUTE = (
-    '/api/v1/group_students_amount/<int:student_amount>'
-)
-GROUPS_ROUTE = '/api/v1/groups'
-GROUP_ROUTE = '/api/v1/group/<int:group_id>'
-GROUP_POST_ROUTE = '/api/v1/group'
-STUDENT_TO_GROUP_ROUTE = '/api/v1/student_to_group'
+GROUP_STUDENTS_AMOUNT_ROUTE = '/group_students_amount/<int:student_amount>'
+GROUPS_ROUTE = '/groups'
+GROUP_ROUTE = '/group/<int:group_id>'
+GROUP_POST_ROUTE = '/group'
+STUDENT_TO_GROUP_ROUTE = '/student_to_group'
 
-STUDENTS_ROUTE = '/api/v1/students'
-STUDENT_POST_ROUTE = '/api/v1/student'
-STUDENT_ROUTE = '/api/v1/student/<int:student_id>'
+STUDENTS_ROUTE = '/students'
+STUDENT_POST_ROUTE = '/student'
+STUDENT_ROUTE = '/student/<int:student_id>'
 
-COURSES_ROUTE = '/api/v1/courses'
-COURSE_STUDENTS_ROUTE = '/api/v1/course_students/<string:course_name>'
-STUDENT_TO_COURSE_ROUTE = '/api/v1/student_to_course'
+COURSES_ROUTE = '/courses'
+COURSE_STUDENTS_ROUTE = '/course_students/<string:course_name>'
+STUDENT_TO_COURSE_ROUTE = '/student_to_course'
 
 
 def init_api_routers(api: Api):

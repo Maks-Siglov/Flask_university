@@ -1,6 +1,9 @@
 import pytest
 
+from app.configs import API_PREFIX
 from app.init_routers import STUDENT_POST_ROUTE
+
+STUDENT_POST_ROUTE = f'{API_PREFIX}{STUDENT_POST_ROUTE}'
 
 add_student_case = [
     {'first_name': 'David', 'last_name': 'Jack'},

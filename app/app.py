@@ -7,6 +7,7 @@ from flask_restful import Api
 from app.logger import logger_config
 from app.init_routers import init_api_routers
 from app.configs import (
+    API_PREFIX,
     APP_DEBUG,
     APP_HOST,
     APP_PORT,
@@ -21,7 +22,7 @@ from app.db.session import (
 def create_app() -> Flask:
     logger_config()
     app = Flask(__name__)
-    api = Api(app)
+    api = Api(app, prefix=API_PREFIX)
     init_api_routers(api)
     Swagger(app)
 

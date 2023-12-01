@@ -1,8 +1,11 @@
 import pytest
 import json
 
+from app.configs import API_PREFIX
 from app.init_routers import STUDENT_TO_COURSE_ROUTE
 from app.crud.university.course import check_student_assigned_to_course
+
+STUDENT_TO_COURSE_ROUTE = f'{API_PREFIX}{STUDENT_TO_COURSE_ROUTE}'
 
 course_name_case = ['course_one_student', 'course_two_student']
 

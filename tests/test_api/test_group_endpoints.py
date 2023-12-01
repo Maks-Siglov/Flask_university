@@ -1,11 +1,15 @@
 import pytest
 import json
 
+from app.configs import API_PREFIX
 from app.crud.university.group import check_student_assigned_to_group
 from app.init_routers import (
     GROUP_POST_ROUTE,
     STUDENT_TO_GROUP_ROUTE,
 )
+
+GROUP_POST_ROUTE = f'{API_PREFIX}{GROUP_POST_ROUTE}'
+STUDENT_TO_GROUP_ROUTE = f'{API_PREFIX}{STUDENT_TO_GROUP_ROUTE}'
 
 test_select_case = [5, 10, 15]
 
