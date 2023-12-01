@@ -53,12 +53,6 @@ def add_group(group: GroupRequest) -> int:
 
 def delete_group(group_id: int) -> None:
     """This function delete group from database"""
-    update_statement = (
-        update(Student)
-        .where(Student.group_id == group_id)
-        .values({"group_id": None})
-    )
-    s.user_db.execute(update_statement)
     delete_statement = (
         delete(Group)
         .where(Group.id == group_id)
