@@ -6,6 +6,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import joinedload
 
+from app.api.university.models import CourseRequest
 from app.db.models import (
     Course,
     Student,
@@ -33,6 +34,35 @@ def course_students(course_name: str) -> list[Student] | None:
     )
     course = s.user_db.scalar(statement)
     return course.students
+
+
+def get_course(course_id: int) -> Course | None:
+    """This function return course by it id, None if not exist"""
+    statement = (
+        select(Course)
+        .options(joinedload(Course.students))
+        .where(Course.id == course_id)
+    )
+    return s.user_db.scalar(statement)
+
+
+def add_course(course: CourseRequest) -> int:
+    """This function create course and insert it to the database"""
+    statement = (
+        insert(Course)
+        .values(**course.model_dump())
+        .returning(Course.id)
+    )
+    return s.user_db.scalar(statement)
+
+
+def delete_course(course_id: int) -> None:
+    """This function delete course from database"""
+    delete_statement = (
+        delete(Course)
+        .where(Course.id == course_id)
+    )
+    s.user_db.execute(delete_statement)
 
 
 def add_student_to_course(student_id: int, course_id: int) -> None:

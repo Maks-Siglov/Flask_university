@@ -10,6 +10,11 @@ class GroupRequest(BaseModel):
     name: str
 
 
+class CourseRequest(BaseModel):
+    name: str
+    description: str
+
+
 class StudentGroupRequest(BaseModel):
     student_id: int
     group_id: int

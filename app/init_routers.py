@@ -12,6 +12,7 @@ from app.api.university.endpoints.group import (
 )
 from app.api.university.endpoints.course import (
     Courses,
+    Course,
     CourseStudents,
     StudentToCourse,
 )
@@ -28,6 +29,8 @@ STUDENT_POST_ROUTE = '/student'
 STUDENT_ROUTE = '/student/<int:student_id>'
 
 COURSES_ROUTE = '/courses'
+COURSE_POST_ROUTE = '/course'
+COURSE_ROUTE = '/course/<int:course_id>'
 COURSE_STUDENTS_ROUTE = '/course_students/<string:course_name>'
 STUDENT_TO_COURSE_ROUTE = '/student_to_course'
 
@@ -39,6 +42,7 @@ def init_api_routers(api: Api):
     api.add_resource(StudentToGroup, STUDENT_TO_GROUP_ROUTE)
 
     api.add_resource(Courses, COURSES_ROUTE)
+    api.add_resource(Course, COURSE_ROUTE, COURSE_POST_ROUTE)
     api.add_resource(CourseStudents, COURSE_STUDENTS_ROUTE)
     api.add_resource(StudentToCourse, STUDENT_TO_COURSE_ROUTE)
 

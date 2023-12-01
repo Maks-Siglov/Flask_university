@@ -6,8 +6,11 @@ from flask import (
 from flask_restful import Resource
 from pydantic import ValidationError
 
-from app.api.university.models import StudentCourserRequest
+from app.api.university.models import StudentCourserRequest, CourseRequest
 from app.crud.university.course import (
+    get_course,
+    add_course,
+    delete_course,
     get_all_courses,
     add_student_to_course,
     course_students,
@@ -67,6 +70,81 @@ class Courses(Resource):
         if not courses:
             return Response([], 204)
         return [course.to_dict() for course in courses]
+
+
+class Course(Resource):
+    def get(self, course_id: int) -> Response | dict[str, Any]:
+        """
+        This method return data about course by it id
+        ---
+        parameters:
+          - name: course_id
+            in: path
+            type: int
+        responses:
+          200:
+            description: return data about course in dict
+            examples: {
+                    "id": 4,
+                    "name": "Chemistry",
+                    "description": "Properties and composition of matter.",
+                    "students": [
+                            {
+                            "id": 2,
+                            "first_name": "Emma",
+                            "last_name": "Wilson"
+                            }
+                        ]
+                    }
+          404:
+            description: course with provided id don't exist
+        """
+        course = get_course(course_id)
+        if not course:
+            return Response(f"Course with id {course_id} don't exist", 404)
+        return course.to_dict()
+
+    def post(self) -> Response:
+        """
+        This method add a new course to the database
+        ---
+        parameters:
+          - name: name
+            in: body
+            type: string
+        responses:
+          201:
+            description: course added successfully
+          422:
+            description: Invalid types in requests
+        """
+        try:
+            course = CourseRequest(**request.get_json())
+            course_id = add_course(course)
+        except ValidationError as exc:
+            return Response(f'Not valid data, {exc}', status=422)
+
+        return Response(f'id = {course_id}', status=201)
+
+    def delete(self, course_id: int):
+        """
+        This method remove course from database by course_id
+        ---
+        parameters:
+          - name: course_id
+            in: path
+            type: int
+        responses:
+          204:
+            description: course removed successfully
+          404:
+            description: This course don't exist
+        """
+        if not get_course(course_id):
+            return Response(f"course {course_id} don't exist", status=404)
+
+        delete_course(course_id)
+        return Response(None, status=204)
 
 
 class StudentToCourse(Resource):

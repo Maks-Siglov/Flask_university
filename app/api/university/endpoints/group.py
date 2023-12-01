@@ -78,7 +78,7 @@ class Group(Resource):
             type: int
         responses:
           200:
-            description: return data about student in dict
+            description: return data about group in dict
             examples: {
                     "id": 1,
                     "name": "FI-63",
@@ -91,7 +91,7 @@ class Group(Resource):
                         ]
                     }
           404:
-            description: Student with provided id don't exist
+            description: Group with provided id don't exist
         """
         group = get_group(group_id)
         if not group:
