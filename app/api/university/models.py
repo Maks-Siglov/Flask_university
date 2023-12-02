@@ -13,6 +13,7 @@ class GroupRequest(BaseModel):
 class CourseRequest(BaseModel):
     name: str = Field(default='Default name')
     description: str = Field(default='Default description')
+    student_ids: list[int] | None = None
 
 
 class StudentGroupRequest(BaseModel):

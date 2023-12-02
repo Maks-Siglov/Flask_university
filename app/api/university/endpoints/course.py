@@ -57,19 +57,17 @@ class CourseStudents(Resource):
 
 
 class Courses(Resource):
-    def get(self) -> list[dict[str, Any]] | Response:
+    def get(self) -> list[dict[str, Any]] | list:
         """
         This method returns all courses with their students
         ---
         responses:
           200:
-            description: returns all courses
-          204:
-            description: there is no courses
+            description: returns all courses or empty list
         """
         courses = get_all_courses()
         if not courses:
-            return Response([], 204)
+            return []
         return [course.to_dict() for course in courses]
 
 
@@ -121,10 +119,10 @@ class Course(Resource):
         """
         try:
             course = CourseRequest(**request.get_json())
-            course_id = add_course(course)
         except ValidationError as exc:
             return Response(f'Not valid data, {exc}', status=422)
 
+        course_id = add_course(course)
         return Response(f'id = {course_id}', status=201)
 
     def patch(self, course_id: int):
@@ -147,13 +145,13 @@ class Course(Resource):
         if not course:
             return Response(f"Course with id {course_id} doesn't exist", 404)
 
+        data = request.get_json()
         try:
-            data = request.get_json()
-            CourseRequest(**data)
+            data = CourseRequest(**data)
         except ValidationError as exc:
             return Response(f'Not valid data, {exc}', status=422)
 
-        update_course(course_id, data)
+        update_course(course, data)
         return Response(
             f'Course with id {course_id} updated successfully', status=200
         )
@@ -201,10 +199,11 @@ class StudentToCourse(Resource):
         """
         try:
             student_course_id = StudentCourserRequest(**request.get_json())
-            student_id = student_course_id.student_id
-            course_id = student_course_id.course_id
         except ValidationError as exc:
             return Response(f'Not valid data {exc}', status=422)
+
+        student_id = student_course_id.student_id
+        course_id = student_course_id.course_id
 
         if check_student_assigned_to_course(student_id, course_id):
             message = (
@@ -237,10 +236,11 @@ class StudentToCourse(Resource):
         """
         try:
             student_course_id = StudentCourserRequest(**request.get_json())
-            student_id = student_course_id.student_id
-            course_id = student_course_id.course_id
         except ValidationError as exc:
             return Response(f'Not valid data {exc}', status=422)
+
+        student_id = student_course_id.student_id
+        course_id = student_course_id.course_id
 
         if not check_student_assigned_to_course(student_id, course_id):
             message = (

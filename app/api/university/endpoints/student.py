@@ -24,13 +24,11 @@ class Students(Resource):
         ---
         responses:
           200:
-            description: returns all students with their relations
-          204:
-            description: there is no students
+            description: returns all students or empty list
         """
         students = get_all_students()
         if not students:
-            return Response([], 204)
+            return []
         return [student.to_dict() for student in students]
 
 
@@ -89,10 +87,10 @@ class Student(Resource):
         """
         try:
             student = StudentRequest(**request.get_json())
-            student_id = add_student(student)
         except ValidationError as exc:
             return Response(f'Not valid data, {exc}', status=422)
 
+        student_id = add_student(student)
         return Response(f'id = {student_id}', status=201)
 
     def patch(self, student_id: int):
@@ -115,8 +113,8 @@ class Student(Resource):
         if not student:
             return Response(f"Student with id {student_id} doesn't exist", 404)
 
+        data = request.get_json()
         try:
-            data = request.get_json()
             StudentRequest(**data)
         except ValidationError as exc:
             return Response(f'Not valid data, {exc}', status=422)

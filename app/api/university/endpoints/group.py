@@ -52,19 +52,17 @@ class GroupStudentAmount(Resource):
 
 
 class Groups(Resource):
-    def get(self) -> list[dict[str, Any]] | Response:
+    def get(self) -> list[dict[str, Any]] | list:
         """
         This method returns all groups with their students
         ---
         responses:
           200:
-            description: returns all groups
-          204:
-            description: there is no groups
+            description: returns all groups or empty list if entity don't exist
         """
         groups = get_all_groups()
         if not groups:
-            return Response([], 204)
+            return []
         return [group.to_dict() for group in groups]
 
 
@@ -115,10 +113,10 @@ class Group(Resource):
         """
         try:
             group = GroupRequest(**request.get_json())
-            group_id = add_group(group)
         except ValidationError as exc:
             return Response(f'Not valid data, {exc}', status=422)
 
+        group_id = add_group(group)
         return Response(f'id = {group_id}', status=201)
 
     def patch(self, group_id: int):
@@ -141,8 +139,8 @@ class Group(Resource):
         if not group:
             return Response(f"Group with id {group_id} doesn't exist", 404)
 
+        data = request.get_json()
         try:
-            data = request.get_json()
             GroupRequest(**data)
         except ValidationError as exc:
             return Response(f'Not valid data, {exc}', status=422)
@@ -195,10 +193,11 @@ class StudentToGroup(Resource):
         """
         try:
             student_group_id = StudentGroupRequest(**request.get_json())
-            student_id = student_group_id.student_id
-            group_id = student_group_id.group_id
         except ValidationError as exc:
             return Response(f'Not valid data {exc}', status=422)
+
+        student_id = student_group_id.student_id
+        group_id = student_group_id.group_id
 
         if check_student_assigned_to_group(student_id, group_id):
             return Response('Student already assigned to group', status=409)
@@ -228,10 +227,11 @@ class StudentToGroup(Resource):
         """
         try:
             student_group_id = StudentGroupRequest(**request.get_json())
-            student_id = student_group_id.student_id
-            group_id = student_group_id.group_id
         except ValidationError as exc:
             return Response(f'Not valid data {exc}', status=422)
+
+        student_id = student_group_id.student_id
+        group_id = student_group_id.group_id
 
         if not check_student_assigned_to_group(student_id, group_id):
             return Response("Student don't assigned to group", status=409)

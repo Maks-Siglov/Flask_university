@@ -1,6 +1,5 @@
 from sqlalchemy import (
     and_,
-    update,
     delete,
     insert,
     select,
@@ -57,14 +56,24 @@ def add_course(course: CourseRequest) -> int:
     return s.user_db.scalar(statement)
 
 
-def update_course(course_id: int, data: dict[str, str]) -> None:
+def update_course(course: Course, data: CourseRequest) -> None:
     """This function update course by provided data"""
-    statement = (
-        update(Course)
-        .where(Course.id == course_id)
-        .values(data)
+    course.name = data.name
+    course.description = data.description
+
+    if not data.student_ids:
+        return
+
+    students = s.user_db.scalars(
+        select(Student)
+        .where(Student.id.in_(data.student_ids))
     )
-    s.user_db.execute(statement)
+
+    if ids := (set(data.student_ids) - {student.id for student in students}):
+        raise ValueError(f'Students with ids {ids} not found')
+
+    course.students.clear()
+    course.students.extend(students)
 
 
 def delete_course(course_id: int) -> None:
