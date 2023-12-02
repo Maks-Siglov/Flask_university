@@ -6,7 +6,11 @@ from flask import (
 from flask_restful import Resource
 from pydantic import ValidationError
 
-from app.api.university.models import StudentCourserRequest, CourseRequest
+from app.api.university.models import (
+    StudentCourserRequest,
+    CourseRequest,
+    CourseResponse
+)
 from app.crud.university.course import (
     get_course,
     add_course,
@@ -14,14 +18,14 @@ from app.crud.university.course import (
     delete_course,
     get_all_courses,
     add_student_to_course,
-    course_students,
+    course_by_name,
     remove_student_from_course,
     check_student_assigned_to_course,
 )
 
 
 class CourseStudents(Resource):
-    def get(self, course_name: str) -> list[dict[str, Any]] | Response:
+    def get(self, course_name: str) -> dict[str, Any] | Response:
         """
         This method retrieves students which related to course"
         ---
@@ -33,27 +37,31 @@ class CourseStudents(Resource):
         responses:
           200:
             description: Returns students assigned to course
-            examples:
-                    'application/json': [
+            examples: {
+                'id': 1,
+                'name': 'Chemistry',
+                "description": "Properties and composition of matter.",
+                students: [
                         {
-                          'id': 2,
-                          'first_name': 'Jacob',
-                          'last_name': 'Martin'
+                            'id': 2,
+                            'first_name': 'Jacob',
+                            'last_name': 'Martin'
                         },
                         {
-                          'id': 2,
-                          'first_name': 'Bob',
-                          'last_name': 'Jackson'
+                            'id': 2,
+                            'first_name': 'Bob',
+                            'last_name': 'Jackson'
                         }
                     ]
+                }
           404:
             description: There is no course with specified name
         """
-        try:
-            students = course_students(course_name)
-        except AttributeError:
-            return Response(f"Course {course_name} don't exist", 404)
-        return [student.to_dict() for student in students]
+        course = course_by_name(course_name)
+        if course is None:
+            return Response(f"Course with name {course_name} don't exist", 404)
+
+        return CourseResponse.model_validate(course).model_dump()
 
 
 class Courses(Resource):
@@ -64,11 +72,38 @@ class Courses(Resource):
         responses:
           200:
             description: returns all courses or empty list
+            examples: [
+                    {
+                    'id': 1,
+                    'name': 'Chemistry',
+                    "description": "Properties and composition of matter.",
+                    students: [
+                            {
+                                'id': 2,
+                                'first_name': 'Jacob',
+                                'last_name': 'Martin'
+                            }
+                        ]
+                    },
+                    'id': 2,
+                    'name': 'Physics',
+                    "description": "Principles of matter and energy.",
+                    students: [
+                            {
+                                'id': 5,
+                                'first_name': 'Frank',
+                                'last_name': 'Garcia'
+                            }
+                        ]
+
+                ]
         """
         courses = get_all_courses()
-        if not courses:
-            return []
-        return [course.to_dict() for course in courses]
+
+        return [
+            CourseResponse.model_validate(course).model_dump()
+            for course in courses
+        ]
 
 
 class Course(Resource):
@@ -101,7 +136,7 @@ class Course(Resource):
         course = get_course(course_id)
         if not course:
             return Response(f"Course with id {course_id} don't exist", 404)
-        return course.to_dict()
+        return CourseResponse.model_validate(course).model_dump()
 
     def post(self) -> Response:
         """

@@ -1,10 +1,12 @@
 from sqlalchemy import (
-    update,
     delete,
     insert,
     select,
 )
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import (
+    joinedload,
+    selectinload,
+)
 
 from app.api.university.models import StudentRequest
 from app.db.models import Student
@@ -16,20 +18,17 @@ def get_all_students() -> list[Student]:
     statement = (
         select(Student).options(
             joinedload(Student.group),
-            joinedload(Student.courses)
+            selectinload(Student.courses)
         )
     )
-    return s.user_db.scalars(statement).unique().all()
+    return s.user_db.scalars(statement).all()
 
 
 def get_student(student_id: int) -> Student | None:
     """This function return student by it id, None if not exist"""
-    statement = (
-        select(Student)
-        .options(joinedload(Student.courses), joinedload(Student.group))
-        .where(Student.id == student_id)
+    return s.user_db.get(
+        Student, student_id, options=[joinedload(Student.courses)]
     )
-    return s.user_db.scalar(statement)
 
 
 def add_student(student: StudentRequest) -> int:
@@ -43,14 +42,10 @@ def add_student(student: StudentRequest) -> int:
     return s.user_db.scalar(statement)
 
 
-def update_student(student_id: int, data: dict[str, str]) -> None:
+def update_student(student: Student, data: StudentRequest) -> None:
     """This function update student by provided data"""
-    statement = (
-        update(Student)
-        .where(Student.id == student_id)
-        .values(data)
-    )
-    s.user_db.execute(statement)
+    student.first_name = data.first_name
+    student.last_name = data.last_name
 
 
 def delete_student(student_id: int) -> None:

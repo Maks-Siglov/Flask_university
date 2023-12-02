@@ -43,12 +43,9 @@ def less_or_equal_students_in_group(
 
 def get_group(group_id: int) -> Group | None:
     """This function return group by it id, None if not exist"""
-    statement = (
-        select(Group)
-        .options(joinedload(Group.students))
-        .where(Group.id == group_id)
+    return s.user_db.get(
+        Group, group_id, options=[joinedload(Group.students)]
     )
-    return s.user_db.scalar(statement)
 
 
 def add_group(group: GroupRequest) -> int:
@@ -61,14 +58,9 @@ def add_group(group: GroupRequest) -> int:
     return s.user_db.scalar(statement)
 
 
-def update_group(grop_id: int, data: dict[str, str]) -> None:
+def update_group(group: Group, data: GroupRequest) -> None:
     """This function updates group by provided data"""
-    statement = (
-        update(Group)
-        .where(Group.id == grop_id)
-        .values(data)
-    )
-    s.user_db.execute(statement)
+    group.name = data.name
 
 
 def delete_group(group_id: int) -> None:

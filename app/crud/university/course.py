@@ -4,7 +4,10 @@ from sqlalchemy import (
     insert,
     select,
 )
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import (
+    selectinload,
+    joinedload,
+)
 
 from app.api.university.models import CourseRequest
 from app.db.models import (
@@ -19,31 +22,27 @@ def get_all_courses() -> list[Course]:
     """This function returns all courses"""
     statement = (
         select(Course).options(
-            joinedload(Course.students)
+            selectinload(Course.students)
         )
     )
-    return s.user_db.scalars(statement).unique().all()
+    return s.user_db.scalars(statement).all()
 
 
-def course_students(course_name: str) -> list[Student] | None:
+def course_by_name(course_name: str) -> Course | None:
     """This function return students which related to course"""
     statement = (
         select(Course)
         .options(joinedload(Course.students))
         .where(Course.name == course_name)
     )
-    course = s.user_db.scalar(statement)
-    return course.students
+    return s.user_db.scalar(statement)
 
 
 def get_course(course_id: int) -> Course | None:
     """This function return course by it id, None if not exist"""
-    statement = (
-        select(Course)
-        .options(joinedload(Course.students))
-        .where(Course.id == course_id)
+    return s.user_db.get(
+        Course, course_id, options=[joinedload(Course.students)]
     )
-    return s.user_db.scalar(statement)
 
 
 def add_course(course: CourseRequest) -> int:
@@ -60,17 +59,15 @@ def update_course(course: Course, data: CourseRequest) -> None:
     """This function update course by provided data"""
     course.name = data.name
     course.description = data.description
-
     if not data.student_ids:
         return
 
     students = s.user_db.scalars(
         select(Student)
         .where(Student.id.in_(data.student_ids))
-    )
-
-    if ids := (set(data.student_ids) - {student.id for student in students}):
-        raise ValueError(f'Students with ids {ids} not found')
+    ).all()
+    if len(students) != len(course.students):
+        raise ValueError('Invalid student ids')
 
     course.students.clear()
     course.students.extend(students)

@@ -6,7 +6,7 @@ from flask import (
 from flask_restful import Resource
 from pydantic import ValidationError
 
-from app.api.university.models import StudentRequest
+from app.api.university.models import StudentRequest, StudentResponse
 
 from app.crud.university.student import (
     get_all_students,
@@ -25,15 +25,34 @@ class Students(Resource):
         responses:
           200:
             description: returns all students or empty list
+            examples: [
+                {
+                  'id': 2,
+                  'first_name': 'Jacob',
+                  'last_name': 'Martin',
+                  'group': {
+                    "id": 1,
+                    "name": "ED-34"
+                    },
+                    courses: [
+                        {
+                        "id": 7,
+                        "name": "Chemistry",
+                        "description": "Properties and composition of matter."
+                        }
+                    ]
+                },
+            ]
         """
         students = get_all_students()
-        if not students:
-            return []
-        return [student.to_dict() for student in students]
+        return [
+            StudentResponse.model_validate(student).model_dump()
+            for student in students
+        ]
 
 
 class Student(Resource):
-    def get(self, student_id: int) -> Response | dict[str, Any]:
+    def get(self, student_id: int) -> dict[str, Any] | Response:
         """
         This method return data about student by it id
         ---
@@ -48,11 +67,11 @@ class Student(Resource):
                     "id": 51,
                     "first_name": "Rachel",
                     "last_name": "Robinson",
-                    "courses": [
                     "group": {
                           "id": 3,
                           "name": "OC-60"
                         },
+                    "courses": [
                         {
                           "id": 5,
                           "name": "Mathematics",
@@ -66,7 +85,7 @@ class Student(Resource):
         student = get_student(student_id)
         if not student:
             return Response(f"Student with id {student_id} don't exist", 404)
-        return student.to_dict()
+        return StudentResponse.model_validate(student).model_dump()
 
     def post(self) -> Response:
         """
@@ -115,11 +134,11 @@ class Student(Resource):
 
         data = request.get_json()
         try:
-            StudentRequest(**data)
+            data = StudentRequest(**data)
         except ValidationError as exc:
             return Response(f'Not valid data, {exc}', status=422)
 
-        update_student(student_id, data)
+        update_student(student, data)
         return Response(
             f'Student with id {student_id} updated successfully', status=200
         )

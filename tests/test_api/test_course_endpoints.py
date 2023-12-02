@@ -18,10 +18,9 @@ def test_course_students(client, course_name):
     response = client.get(f'/api/v1/course_students/{course_name}')
     assert response.status_code == 200
     data = json.loads(response.data)
-    for item in data:
-        assert 'id' in item
-        assert 'first_name' in item
-        assert 'last_name' in item
+    assert 'name' in data
+    assert 'description' in data
+    assert 'students' in data
 
 
 def test_non_exist_course(client):

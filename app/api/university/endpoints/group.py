@@ -8,6 +8,7 @@ from pydantic import ValidationError
 
 from app.api.university.models import (
     GroupRequest,
+    GroupResponse,
     StudentGroupRequest,
 )
 from app.crud.university.group import (
@@ -45,10 +46,13 @@ class GroupStudentAmount(Resource):
           404:
             description: There is no groups with specified amount
         """
-        query_result = less_or_equal_students_in_group(student_amount)
-        if not query_result:
+        groups = less_or_equal_students_in_group(student_amount)
+        if not groups:
             return Response('There is no group with that amount', 404)
-        return [group.to_dict(exclude={'students'}) for group in query_result]
+        return [
+            GroupResponse.model_validate(group).model_dump()
+            for group in groups
+        ]
 
 
 class Groups(Resource):
@@ -61,9 +65,10 @@ class Groups(Resource):
             description: returns all groups or empty list if entity don't exist
         """
         groups = get_all_groups()
-        if not groups:
-            return []
-        return [group.to_dict() for group in groups]
+        return [
+            GroupResponse.model_validate(group).model_dump()
+            for group in groups
+        ]
 
 
 class Group(Resource):
@@ -95,7 +100,7 @@ class Group(Resource):
         group = get_group(group_id)
         if not group:
             return Response(f"Student with id {group_id} don't exist", 404)
-        return group.to_dict()
+        return GroupResponse.model_validate(group).model_dump()
 
     def post(self) -> Response:
         """
@@ -141,11 +146,11 @@ class Group(Resource):
 
         data = request.get_json()
         try:
-            GroupRequest(**data)
+            data = GroupRequest(**data)
         except ValidationError as exc:
             return Response(f'Not valid data, {exc}', status=422)
 
-        update_group(group_id, data)
+        update_group(group, data)
         return Response(
             f'Group with id {group_id} updated successfully', status=200
         )
