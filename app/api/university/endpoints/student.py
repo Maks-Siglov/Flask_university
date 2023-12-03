@@ -17,7 +17,7 @@ from app.crud.university.student import (
 )
 
 
-class Students(Resource):
+class StudentsApi(Resource):
     def get(self) -> list[dict[str, Any]] | Response:
         """
         This method returns all students with their courses and groups
@@ -51,7 +51,7 @@ class Students(Resource):
         ]
 
 
-class Student(Resource):
+class StudentApi(Resource):
     def get(self, student_id: int) -> dict[str, Any] | Response:
         """
         This method return data about student by it id

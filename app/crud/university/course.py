@@ -1,20 +1,15 @@
-from sqlalchemy import (
-    and_,
-    delete,
-    insert,
-    select,
-)
+from sqlalchemy import select
+
 from sqlalchemy.orm import (
     selectinload,
     joinedload,
 )
 
 from app.api.university.models import CourseRequest
-from app.db.models import (
-    Course,
-    Student,
-    StudentCourseAssociationTable,
-)
+from app.crud.university.utils import set_value_to_model
+from app.db.models import Course
+
+from app.crud.university.student import get_student_by_ids
 from app.db.session import s
 
 
@@ -28,16 +23,6 @@ def get_all_courses() -> list[Course]:
     return s.user_db.scalars(statement).all()
 
 
-def course_by_name(course_name: str) -> Course | None:
-    """This function return students which related to course"""
-    statement = (
-        select(Course)
-        .options(joinedload(Course.students))
-        .where(Course.name == course_name)
-    )
-    return s.user_db.scalar(statement)
-
-
 def get_course(course_id: int) -> Course | None:
     """This function return course by it id, None if not exist"""
     return s.user_db.get(
@@ -45,78 +30,73 @@ def get_course(course_id: int) -> Course | None:
     )
 
 
-def add_course(course: CourseRequest) -> int:
+def add_course(course_data: CourseRequest) -> Course:
     """This function create course and insert it to the database"""
-    statement = (
-        insert(Course)
-        .values(**course.model_dump())
-        .returning(Course.id)
-    )
-    return s.user_db.scalar(statement)
+    course = Course(**course_data.model_dump(exclude={'student_ids'}))
+
+    if course_data.student_ids:
+        students = get_student_by_ids(course_data.student_ids)
+        course.students.extend(students)
+
+    s.user_db.add(course)
+    s.user_db.commit()
+    s.user_db.refresh(course)
+    return course
 
 
-def update_course(course: Course, data: CourseRequest) -> None:
+def update_course(
+        course: Course, request_data: CourseRequest, append: bool, remove: bool
+) -> None:
     """This function update course by provided data"""
-    course.name = data.name
-    course.description = data.description
-    if not data.student_ids:
-        return
-
-    students = s.user_db.scalars(
-        select(Student)
-        .where(Student.id.in_(data.student_ids))
-    ).all()
-    if len(students) != len(course.students):
-        raise ValueError('Invalid student ids')
-
-    course.students.clear()
-    course.students.extend(students)
+    course = set_value_to_model(course, request_data, exclude={'students_ids'})
+    if request_data.student_ids:
+        if append:
+            _add_students_to_course(course, request_data.student_ids)
+        if remove:
+            _remove_students_from_course(course, request_data.student_ids)
 
 
-def delete_course(course_id: int) -> None:
+def _add_students_to_course(
+        course: Course, student_ids: list[int]
+) -> None:
+    """This function selects students by provided ids, if student already
+    persist on course ValueError raised, after check we add students to course
+    """
+    print('beg append')
+    new_students = get_student_by_ids(student_ids)
+    for student in new_students:
+        if student in course.students:
+            raise ValueError(
+                f'Student {student.id} already assigned to {course.name}'
+            )
+    course.students.extend(new_students)
+
+
+def _remove_students_from_course(
+        course: Course, student_ids: list[int]
+) -> None:
+    """This function selects students by provided ids, if student don't persist
+     on course ValueError raised, after check we remove student from course
+    """
+    removed_students = get_student_by_ids(student_ids)
+    for student in removed_students:
+        if student not in course.students:
+            raise ValueError(
+                f"Student {student.id} don't persist in {course.name}"
+            )
+        course.students.remove(student)
+
+
+def delete_course(course: Course) -> None:
     """This function delete course from database"""
-    delete_statement = (
-        delete(Course)
-        .where(Course.id == course_id)
-    )
-    s.user_db.execute(delete_statement)
+    s.user_db.delete(course)
 
 
-def add_student_to_course(student_id: int, course_id: int) -> None:
-    """This function take course from database by course_name and insert
-    student to it"""
-    insert_statement = (
-        insert(StudentCourseAssociationTable)
-        .values(student_id=student_id, course_id=course_id)
-    )
-
-    s.user_db.execute(insert_statement)
-
-
-def remove_student_from_course(student_id: int, course_id: int) -> None:
-    """This function take course from database by course_name then removes
-    student from course"""
-    delete_statement = (
-        delete(StudentCourseAssociationTable)
-        .where(and_(
-            StudentCourseAssociationTable.student_id == student_id,
-            StudentCourseAssociationTable.course_id == course_id
-        ))
-    )
-
-    s.user_db.execute(delete_statement)
-
-
-def check_student_assigned_to_course(
-        student_id: int, course_id: int,
-) -> StudentCourseAssociationTable | None:
-    """This function checks if student assigned to course"""
+def get_course_by_name(course_name: str) -> Course | None:
+    """This function return students which related to course"""
     statement = (
-        select(StudentCourseAssociationTable)
-        .where(and_(
-            StudentCourseAssociationTable.student_id == student_id,
-            StudentCourseAssociationTable.course_id == course_id
-        ))
+        select(Course)
+        .options(joinedload(Course.students))
+        .where(Course.name == course_name)
     )
-
     return s.user_db.scalar(statement)

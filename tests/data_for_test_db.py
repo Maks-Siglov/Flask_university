@@ -6,13 +6,13 @@ from app.db.models import (
 )
 
 COURSE_ONE = {
-    'id': 1, 'name': 'course_one_student', 'description': 'Description 1'
+    'name': 'course_one_student', 'description': 'Description 1'
 }
 COURSE_TWO = {
-    'id': 2, 'name': 'course_two_student', 'description': 'Description 2'
+    'name': 'course_two_student', 'description': 'Description 2'
 }
 COURSE_WITHOUT_STUDENT = {
-    'id': 3, 'name': 'course_without_student', 'description': 'Description 3'
+    'name': 'course_without_student', 'description': 'Description 3'
 }
 
 

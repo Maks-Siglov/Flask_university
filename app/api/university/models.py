@@ -42,8 +42,3 @@ class GroupResponse(MyBaseModel):
 class StudentGroupRequest(BaseModel):
     student_id: int
     group_id: int
-
-
-class StudentCourserRequest(BaseModel):
-    student_id: int
-    course_id: int

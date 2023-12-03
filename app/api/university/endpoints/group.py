@@ -24,7 +24,7 @@ from app.crud.university.group import (
 )
 
 
-class GroupStudentAmount(Resource):
+class GroupStudentAmountApi(Resource):
     def get(self, student_amount: int) -> list[dict[str, Any]] | Response:
         """
         This method retrieves a groups with less or equal student amount
@@ -55,7 +55,7 @@ class GroupStudentAmount(Resource):
         ]
 
 
-class Groups(Resource):
+class GroupsApi(Resource):
     def get(self) -> list[dict[str, Any]] | list:
         """
         This method returns all groups with their students
@@ -71,7 +71,7 @@ class Groups(Resource):
         ]
 
 
-class Group(Resource):
+class GroupApi(Resource):
     def get(self, group_id: int) -> Response | dict[str, Any]:
         """
         This method return data about group by it id
@@ -176,7 +176,7 @@ class Group(Resource):
         return Response(None, status=204)
 
 
-class StudentToGroup(Resource):
+class StudentToGroupApi(Resource):
     def post(self) -> Response:
         """
         This method add student to the group

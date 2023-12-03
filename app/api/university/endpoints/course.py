@@ -7,7 +7,6 @@ from flask_restful import Resource
 from pydantic import ValidationError
 
 from app.api.university.models import (
-    StudentCourserRequest,
     CourseRequest,
     CourseResponse
 )
@@ -17,58 +16,20 @@ from app.crud.university.course import (
     update_course,
     delete_course,
     get_all_courses,
-    add_student_to_course,
-    course_by_name,
-    remove_student_from_course,
-    check_student_assigned_to_course,
 )
 
 
-class CourseStudents(Resource):
-    def get(self, course_name: str) -> dict[str, Any] | Response:
-        """
-        This method retrieves students which related to course"
-        ---
-        parameters:
-          - name: course_name
-            in: path
-            type: string
-
-        responses:
-          200:
-            description: Returns students assigned to course
-            examples: {
-                'id': 1,
-                'name': 'Chemistry',
-                "description": "Properties and composition of matter.",
-                students: [
-                        {
-                            'id': 2,
-                            'first_name': 'Jacob',
-                            'last_name': 'Martin'
-                        },
-                        {
-                            'id': 2,
-                            'first_name': 'Bob',
-                            'last_name': 'Jackson'
-                        }
-                    ]
-                }
-          404:
-            description: There is no course with specified name
-        """
-        course = course_by_name(course_name)
-        if course is None:
-            return Response(f"Course with name {course_name} don't exist", 404)
-
-        return CourseResponse.model_validate(course).model_dump()
-
-
-class Courses(Resource):
+class CoursesApi(Resource):
     def get(self) -> list[dict[str, Any]] | list:
         """
         This method returns all courses with their students
         ---
+        parameters:
+          - name: with_students
+            in: query
+            type: boolean
+            default: true
+            description: Flag to include students in the response.
         responses:
           200:
             description: returns all courses or empty list
@@ -95,18 +56,21 @@ class Courses(Resource):
                                 'last_name': 'Garcia'
                             }
                         ]
-
                 ]
         """
-        courses = get_all_courses()
+        with_students = request.args.get(
+            'with_students', default=False, type=bool
+        )
+        exclude = {} if with_students else {'students'}
 
+        courses = get_all_courses()
         return [
-            CourseResponse.model_validate(course).model_dump()
+            CourseResponse.model_validate(course).model_dump(exclude=exclude)
             for course in courses
         ]
 
 
-class Course(Resource):
+class CourseApi(Resource):
     def get(self, course_id: int) -> Response | dict[str, Any]:
         """
         This method return data about course by it id
@@ -153,12 +117,14 @@ class Course(Resource):
             description: Invalid types in requests
         """
         try:
-            course = CourseRequest(**request.get_json())
-        except ValidationError as exc:
+            course_data = CourseRequest(**request.get_json())
+            course = add_course(course_data)
+        except (ValidationError, ValueError) as exc:
             return Response(f'Not valid data, {exc}', status=422)
 
-        course_id = add_course(course)
-        return Response(f'id = {course_id}', status=201)
+        return Response(
+            CourseResponse.model_validate(course).model_dump_json(), 201
+        )
 
     def patch(self, course_id: int):
         """
@@ -176,17 +142,18 @@ class Course(Resource):
           422:
             description: Not valid data for updating
         """
+        append = request.args.get('append', default=False, type=bool)
+        remove = request.args.get('remove', default=False, type=bool)
         course = get_course(course_id)
         if not course:
             return Response(f"Course with id {course_id} doesn't exist", 404)
 
-        data = request.get_json()
         try:
-            data = CourseRequest(**data)
+            request_data = CourseRequest(**request.get_json())
         except ValidationError as exc:
             return Response(f'Not valid data, {exc}', status=422)
 
-        update_course(course, data)
+        update_course(course, request_data, append, remove)
         return Response(
             f'Course with id {course_id} updated successfully', status=200
         )
@@ -205,84 +172,9 @@ class Course(Resource):
           404:
             description: This course don't exist
         """
-        if not get_course(course_id):
+        course = get_course(course_id)
+        if not course:
             return Response(f"course {course_id} don't exist", status=404)
 
-        delete_course(course_id)
+        delete_course(course)
         return Response(None, status=204)
-
-
-class StudentToCourse(Resource):
-    def post(self) -> Response:
-        """
-        This method add student to the course
-        ---
-        parameters:
-          - name: student_id
-            in: body
-            type: int
-          - name: course_id
-            in: body
-            type: int
-        responses:
-          201:
-            description: Student added to course successfully
-          409:
-            description: Student already assigned to the course
-          422:
-            description: Invalid types in requests
-        """
-        try:
-            student_course_id = StudentCourserRequest(**request.get_json())
-        except ValidationError as exc:
-            return Response(f'Not valid data {exc}', status=422)
-
-        student_id = student_course_id.student_id
-        course_id = student_course_id.course_id
-
-        if check_student_assigned_to_course(student_id, course_id):
-            message = (
-                f'Student {student_id} already assigned to course {course_id}'
-            )
-            return Response(message, status=409)
-
-        add_student_to_course(student_id, course_id)
-        response_message = f'Student {student_id} added to course{course_id}'
-        return Response(response_message, status=201)
-
-    def delete(self) -> Response:
-        """
-        This method removes student from the course
-        ---
-        parameters:
-          - name: student_id
-            in: body
-            type: int
-          - name: course_id
-            in: body
-            type: int
-        responses:
-          204:
-            description: Student removed from course successfully
-          404:
-            description: Student don't assigned to the course
-          422:
-            description: Invalid types in requests
-        """
-        try:
-            student_course_id = StudentCourserRequest(**request.get_json())
-        except ValidationError as exc:
-            return Response(f'Not valid data {exc}', status=422)
-
-        student_id = student_course_id.student_id
-        course_id = student_course_id.course_id
-
-        if not check_student_assigned_to_course(student_id, course_id):
-            message = (
-                f"Student  {student_id} don't assigned to course {course_id}"
-            )
-            return Response(message, status=404)
-
-        remove_student_from_course(student_id, course_id)
-        message = f'Student {student_id} removed from course {course_id}'
-        return Response(message, status=204)

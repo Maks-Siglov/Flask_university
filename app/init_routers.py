@@ -1,20 +1,18 @@
 from flask_restful import Api
 
 from app.api.university.endpoints.student import (
-    Students,
-    Student
+    StudentsApi,
+    StudentApi
 )
 from app.api.university.endpoints.group import (
-    GroupStudentAmount,
-    StudentToGroup,
-    Group,
-    Groups,
+    GroupStudentAmountApi,
+    StudentToGroupApi,
+    GroupApi,
+    GroupsApi,
 )
 from app.api.university.endpoints.course import (
-    Courses,
-    Course,
-    CourseStudents,
-    StudentToCourse,
+    CoursesApi,
+    CourseApi,
 )
 
 
@@ -31,20 +29,16 @@ STUDENT_ROUTE = '/student/<int:student_id>'
 COURSES_ROUTE = '/courses'
 COURSE_POST_ROUTE = '/course'
 COURSE_ROUTE = '/course/<int:course_id>'
-COURSE_STUDENTS_ROUTE = '/course_students/<string:course_name>'
-STUDENT_TO_COURSE_ROUTE = '/student_to_course'
 
 
 def init_api_routers(api: Api):
-    api.add_resource(GroupStudentAmount, GROUP_STUDENTS_AMOUNT_ROUTE)
-    api.add_resource(Groups, GROUPS_ROUTE)
-    api.add_resource(Group, GROUP_ROUTE, GROUP_POST_ROUTE)
-    api.add_resource(StudentToGroup, STUDENT_TO_GROUP_ROUTE)
+    api.add_resource(GroupStudentAmountApi, GROUP_STUDENTS_AMOUNT_ROUTE)
+    api.add_resource(GroupsApi, GROUPS_ROUTE)
+    api.add_resource(GroupApi, GROUP_ROUTE, GROUP_POST_ROUTE)
+    api.add_resource(StudentToGroupApi, STUDENT_TO_GROUP_ROUTE)
 
-    api.add_resource(Courses, COURSES_ROUTE)
-    api.add_resource(Course, COURSE_ROUTE, COURSE_POST_ROUTE)
-    api.add_resource(CourseStudents, COURSE_STUDENTS_ROUTE)
-    api.add_resource(StudentToCourse, STUDENT_TO_COURSE_ROUTE)
+    api.add_resource(CoursesApi, COURSES_ROUTE)
+    api.add_resource(CourseApi, COURSE_ROUTE, COURSE_POST_ROUTE)
 
-    api.add_resource(Students, STUDENTS_ROUTE)
-    api.add_resource(Student, STUDENT_ROUTE, STUDENT_POST_ROUTE)
+    api.add_resource(StudentsApi, STUDENTS_ROUTE)
+    api.add_resource(StudentApi, STUDENT_ROUTE, STUDENT_POST_ROUTE)
