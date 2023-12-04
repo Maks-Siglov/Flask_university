@@ -75,13 +75,10 @@ def update_group(
 ) -> None:
     """This function updates group by provided data"""
     group = set_value_to_model(group, request_data, exclude={'student_ids'})
-    print('aaaaa')
     if request_data.student_ids:
-        print('sss')
         if append:
             _add_students_to_group(group, request_data.student_ids)
         if remove:
-            print('fff')
             _remove_students_from_group(group, request_data.student_ids)
 
 
