@@ -142,3 +142,9 @@ def test_course_remove_not_existed_students(client):
         query_string={'remove': True}
     )
     pytest.raises(ValueError)
+
+
+def test_delete_course(client):
+    response = client.delete('/api/v1/course/5')
+    assert response.status_code == 204
+    assert response.data == b''

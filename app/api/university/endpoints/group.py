@@ -9,7 +9,6 @@ from pydantic import ValidationError
 from app.api.university.models import (
     GroupRequest,
     GroupResponse,
-    StudentGroupRequest,
 )
 from app.crud.university.group import (
     less_or_equal_students_in_group,
@@ -18,9 +17,6 @@ from app.crud.university.group import (
     add_group,
     update_group,
     delete_group,
-    check_student_assigned_to_group,
-    add_student_to_group,
-    remove_student_from_group,
 )
 
 
@@ -64,9 +60,13 @@ class GroupsApi(Resource):
           200:
             description: returns all groups or empty list if entity don't exist
         """
+        with_students = request.args.get(
+            'with_students', default=False, type=bool
+        )
+        exclude = {} if with_students else {'students'}
         groups = get_all_groups()
         return [
-            GroupResponse.model_validate(group).model_dump()
+            GroupResponse.model_validate(group).model_dump(exclude=exclude)
             for group in groups
         ]
 
@@ -117,12 +117,14 @@ class GroupApi(Resource):
             description: Invalid types in requests
         """
         try:
-            group = GroupRequest(**request.get_json())
+            group_data = GroupRequest(**request.get_json())
+            group = add_group(group_data)
         except ValidationError as exc:
             return Response(f'Not valid data, {exc}', status=422)
 
-        group_id = add_group(group)
-        return Response(f'id = {group_id}', status=201)
+        return Response(
+            GroupResponse.model_validate(group).model_dump_json(), 201
+        )
 
     def patch(self, group_id: int):
         """
@@ -140,17 +142,18 @@ class GroupApi(Resource):
           422:
             description: Not valid data for updating
         """
+        append = request.args.get('append', default=False, type=bool)
+        remove = request.args.get('remove', default=False, type=bool)
         group = get_group(group_id)
         if not group:
             return Response(f"Group with id {group_id} doesn't exist", 404)
 
-        data = request.get_json()
         try:
-            data = GroupRequest(**data)
-        except ValidationError as exc:
+            request_data = GroupRequest(**request.get_json())
+        except ValueError as exc:
             return Response(f'Not valid data, {exc}', status=422)
 
-        update_group(group, data)
+        update_group(group, request_data, append, remove)
         return Response(
             f'Group with id {group_id} updated successfully', status=200
         )
@@ -169,80 +172,9 @@ class GroupApi(Resource):
           404:
             description: This group don't exist
         """
-        if not get_group(group_id):
+        group = get_group(group_id)
+        if not group:
             return Response(f"Group {group_id} don't exist", status=404)
 
-        delete_group(group_id)
+        delete_group(group)
         return Response(None, status=204)
-
-
-class StudentToGroupApi(Resource):
-    def post(self) -> Response:
-        """
-        This method add student to the group
-        ---
-        parameters:
-          - name: student_id
-            in: body
-            type: int
-          - name: group_id
-            in: body
-            type: int
-        responses:
-          201:
-            description: Student added to group successfully
-          409:
-            description: Student already assigned to the group
-          422:
-            description: Invalid types in requests
-        """
-        try:
-            student_group_id = StudentGroupRequest(**request.get_json())
-        except ValidationError as exc:
-            return Response(f'Not valid data {exc}', status=422)
-
-        student_id = student_group_id.student_id
-        group_id = student_group_id.group_id
-
-        if check_student_assigned_to_group(student_id, group_id):
-            return Response('Student already assigned to group', status=409)
-
-        add_student_to_group(student_id, group_id)
-        response_message = f'Student {student_id} added to group {group_id}'
-        return Response(response_message, status=201)
-
-    def delete(self) -> Response:
-        """
-        This method removes student from the group
-        ---
-        parameters:
-          - name: student_id
-            in: body
-            type: int
-          - name: group_id
-            in: body
-            type: int
-        responses:
-          204:
-            description: Student removed from group successfully
-          404:
-            description: Student don't assigned to the group
-          422:
-            description: Invalid types in requests
-        """
-        try:
-            student_group_id = StudentGroupRequest(**request.get_json())
-        except ValidationError as exc:
-            return Response(f'Not valid data {exc}', status=422)
-
-        student_id = student_group_id.student_id
-        group_id = student_group_id.group_id
-
-        if not check_student_assigned_to_group(student_id, group_id):
-            return Response("Student don't assigned to group", status=409)
-
-        remove_student_from_group(student_id)
-        response_message = (
-            f'Student {student_id} removed from group {group_id}'
-        )
-        return Response(response_message, status=204)

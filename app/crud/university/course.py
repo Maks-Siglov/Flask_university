@@ -62,7 +62,6 @@ def _add_students_to_course(
     """This function selects students by provided ids, if student already
     persist on course ValueError raised, after check we add students to course
     """
-    print('beg append')
     new_students = get_student_by_ids(student_ids)
     for student in new_students:
         if student in course.students:

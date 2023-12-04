@@ -7,8 +7,6 @@ from sqlalchemy.orm import (
     joinedload,
     selectinload,
 )
-from sqlalchemy import Sequence
-
 
 from app.api.university.models import StudentRequest
 from app.db.models import Student
@@ -26,7 +24,7 @@ def get_all_students() -> list[Student]:
     return s.user_db.scalars(statement).all()
 
 
-def get_student_by_ids(student_ids: list[int]) -> Sequence[Student]:
+def get_student_by_ids(student_ids: list[int]) -> list[Student]:
     """This function returns students by provided ids"""
     students = s.user_db.scalars(
         select(Student).where(Student.id.in_(student_ids))
@@ -41,7 +39,7 @@ def get_student(student_id: int) -> Student | None:
     )
 
 
-def add_student(student: StudentRequest) -> int:
+def add_student(student: StudentRequest) -> int | None:
     """This function insert student to the database"""
     statement = (
         insert(Student)

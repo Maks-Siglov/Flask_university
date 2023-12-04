@@ -1,19 +1,14 @@
 from sqlalchemy import (
-    and_,
-    delete,
     func,
-    insert,
     select,
-    update,
     Sequence,
 )
 from sqlalchemy.orm import joinedload
 
+from app.crud.university.utils import set_value_to_model
+from app.crud.university.student import get_student_by_ids
 from app.api.university.models import GroupRequest
-from app.db.models import (
-    Group,
-    Student,
-)
+from app.db.models import Group
 from app.db.session import s
 
 
@@ -48,58 +43,78 @@ def get_group(group_id: int) -> Group | None:
     )
 
 
-def add_group(group: GroupRequest) -> int:
+def get_group_by_name(group_name: str) -> Group | None:
+    statement = (
+        select(Group)
+        .where(Group.name == group_name)
+    )
+    return s.user_db.scalar(statement)
+
+
+def add_group(group_data: GroupRequest) -> Group:
     """This function create group and insert it to the database"""
-    statement = (
-        insert(Group)
-        .values(**group.model_dump())
-        .returning(Group.id)
-    )
-    return s.user_db.scalar(statement)
+    group = Group(**group_data.model_dump(exclude={'student_ids'}))
+
+    if group_data.student_ids:
+        students = get_student_by_ids(group_data.student_ids)
+        for student in students:
+            if student.group:
+                raise ValueError(
+                    f'Student {student.id} already belong to {student.group}'
+                )
+        group.students.extend(students)
+
+    s.user_db.add(group)
+    s.user_db.commit()
+    s.user_db.refresh(group)
+    return group
 
 
-def update_group(group: Group, data: GroupRequest) -> None:
+def update_group(
+        group: Group, request_data: GroupRequest, append: bool, remove: bool
+) -> None:
     """This function updates group by provided data"""
-    group.name = data.name
+    group = set_value_to_model(group, request_data, exclude={'student_ids'})
+    print('aaaaa')
+    if request_data.student_ids:
+        print('sss')
+        if append:
+            _add_students_to_group(group, request_data.student_ids)
+        if remove:
+            print('fff')
+            _remove_students_from_group(group, request_data.student_ids)
 
 
-def delete_group(group_id: int) -> None:
+def _add_students_to_group(
+        group: Group, student_ids: list[int]
+) -> None:
+    """This function selects students by provided ids, if student already
+    persist in group ValueError raised, after check we add students to group
+    """
+    new_students = get_student_by_ids(student_ids)
+    for student in new_students:
+        if student.group:
+            raise ValueError(
+                f'Student {student.id} already belong to {group.name}'
+            )
+    group.students.extend(new_students)
+
+
+def _remove_students_from_group(
+        group: Group, student_ids: list[int]
+) -> None:
+    """This function selects students by provided ids, if student don't persist
+     in group ValueError raised, after check we remove student from group
+    """
+    removed_students = get_student_by_ids(student_ids)
+    for student in removed_students:
+        if student not in group.students:
+            raise ValueError(
+                f"Student {student.id} don't persist in {group.name}"
+            )
+        group.students.remove(student)
+
+
+def delete_group(group: Group) -> None:
     """This function delete group from database"""
-    delete_statement = (
-        delete(Group)
-        .where(Group.id == group_id)
-    )
-    s.user_db.execute(delete_statement)
-
-
-def add_student_to_group(student_id: int, group_id: int) -> None:
-    """This function add student to the grop by updating student group_id"""
-    statement = (
-        update(Student)
-        .where(Student.id == student_id)
-        .values({'group_id': group_id})
-    )
-    s.user_db.execute(statement)
-
-
-def remove_student_from_group(student_id: int) -> None:
-    statement = (
-        update(Student)
-        .where(Student.id == student_id)
-        .values({'group_id': None})
-    )
-    s.user_db.execute(statement)
-
-
-def check_student_assigned_to_group(
-        student_id: int, group_id: int
-) -> Student | None:
-    """This function checks if the student persist in group"""
-    statement = (
-        select(Student)
-        .where(and_(
-            Student.id == student_id,
-            Student.group_id == group_id
-        ))
-    )
-    return s.user_db.scalar(statement)
+    s.user_db.delete(group)

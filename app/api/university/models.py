@@ -30,15 +30,11 @@ class CourseResponse(MyBaseModel):
 
 
 class GroupRequest(MyBaseModel):
-    name: str
+    name: str | None = None
+    student_ids: list[int] | None = None
 
 
 class GroupResponse(MyBaseModel):
     id: int
     name: str
     students: list[StudentResponse] | None = None
-
-
-class StudentGroupRequest(BaseModel):
-    student_id: int
-    group_id: int
