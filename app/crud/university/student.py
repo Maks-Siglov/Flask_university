@@ -1,13 +1,12 @@
-from sqlalchemy import (
-    delete,
-    insert,
-    select,
-)
+from sqlalchemy import select
+
 from sqlalchemy.orm import (
     joinedload,
     selectinload,
 )
 
+from app.crud.university.utils import set_value_to_model, get_course_by_ids
+from app.crud.university.group import get_group
 from app.api.university.models import StudentRequest
 from app.db.models import Student
 from app.db.session import s
@@ -24,14 +23,6 @@ def get_all_students() -> list[Student]:
     return s.user_db.scalars(statement).all()
 
 
-def get_student_by_ids(student_ids: list[int]) -> list[Student]:
-    """This function returns students by provided ids"""
-    students = s.user_db.scalars(
-        select(Student).where(Student.id.in_(student_ids))
-    ).all()
-    return students
-
-
 def get_student(student_id: int) -> Student | None:
     """This function return student by it id, None if not exist"""
     return s.user_db.get(
@@ -39,24 +30,86 @@ def get_student(student_id: int) -> Student | None:
     )
 
 
-def add_student(student: StudentRequest) -> int | None:
+def add_student(student_data: StudentRequest) -> Student:
     """This function insert student to the database"""
-    statement = (
-        insert(Student)
-        .values(**student.model_dump())
-        .returning(Student.id)
+    student = Student(
+        **student_data.model_dump(exclude={'course_ids', 'group_id'})
+    )
+    if student_data.course_ids:
+        courses = get_course_by_ids(student_data.course_ids)
+        student.courses.extend(courses)
+
+    if student_data.group_id:
+        group = get_group(student_data.group_id)
+        student.group_id = group.id
+
+    s.user_db.add(student)
+    s.user_db.commit()
+    s.user_db.refresh(student)
+    return student
+
+
+def update_student(
+        student: Student,
+        request_data: StudentRequest,
+        append: bool,
+        remove: bool
+) -> None:
+    """This function update student by provided data"""
+    student = set_value_to_model(
+        student, request_data, exclude={'group_id', 'course_ids'}
     )
 
-    return s.user_db.scalar(statement)
+    if request_data.group_id:
+        _change_student_group(
+            student, request_data.group_id, append, remove
+        )
+
+    if request_data.course_ids:
+        _update_student_courses(
+            student, request_data.course_ids, append, remove
+        )
 
 
-def update_student(student: Student, data: StudentRequest) -> None:
-    """This function update student by provided data"""
-    student.first_name = data.first_name
-    student.last_name = data.last_name
+def _change_student_group(
+        student: Student, group_id: int, append: bool, remove: bool
+) -> None:
+    if append:
+        if student.group:
+            raise ValueError(
+                f'Student {student.id} already assigned to {student.group}'
+            )
+        student.group = get_group(group_id)
+
+    if remove:
+        if not student.group_id == group_id:
+            raise ValueError(
+                f'Student {student.id} not in group {group_id}'
+            )
+        student.group_id = None
 
 
-def delete_student(student_id: int) -> None:
+def _update_student_courses(
+        student: Student, course_ids: list[int], append: bool, remove: bool
+) -> None:
+    courses = get_course_by_ids(course_ids)
+    if append:
+        for course in courses:
+            if course in student.courses:
+                raise ValueError(
+                    f'Student {student.id} already assigned to {course}'
+                )
+            student.courses.extend(courses)
+
+    if remove:
+        for course in courses:
+            if course not in student.courses:
+                raise ValueError(
+                    f"Student {student.id} don't assign to {course}"
+                )
+            student.courses.remove(course)
+
+
+def delete_student(student: Student) -> None:
     """This function delete student from database"""
-    delete_statement = delete(Student).where(Student.id == student_id)
-    s.user_db.execute(delete_statement)
+    s.user_db.delete(student)

@@ -1,3 +1,4 @@
+from typing import Union
 from pydantic import BaseModel, ConfigDict
 
 
@@ -8,9 +9,19 @@ class MyBaseModel(BaseModel):
 class StudentRequest(MyBaseModel):
     first_name: str | None = None
     last_name: str | None = None
+    group_id: int | None = None
+    course_ids: list[int] | None = None
 
 
 class StudentResponse(MyBaseModel):
+    id: int
+    first_name: str | None = None
+    last_name: str | None = None
+    group: Union['GroupResponse', None] = None
+    courses: list['CourseResponse'] | None = None
+
+
+class StudentResponse2(MyBaseModel):
     id: int
     first_name: str | None = None
     last_name: str | None = None
@@ -26,7 +37,7 @@ class CourseResponse(MyBaseModel):
     id: int
     name: str
     description: str
-    students: list[StudentResponse] | None = None
+    students: list[StudentResponse2] | None = None
 
 
 class GroupRequest(MyBaseModel):
@@ -37,4 +48,4 @@ class GroupRequest(MyBaseModel):
 class GroupResponse(MyBaseModel):
     id: int
     name: str
-    students: list[StudentResponse] | None = None
+    students: list[StudentResponse2] | None = None

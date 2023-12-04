@@ -6,10 +6,9 @@ from sqlalchemy.orm import (
 )
 
 from app.api.university.models import CourseRequest
-from app.crud.university.utils import set_value_to_model
+from app.crud.university.utils import set_value_to_model, get_student_by_ids
 from app.db.models import Course
 
-from app.crud.university.student import get_student_by_ids
 from app.db.session import s
 
 

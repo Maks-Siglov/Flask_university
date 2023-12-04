@@ -1,8 +1,10 @@
 import typing as t
 from pydantic import BaseModel
+from sqlalchemy import select
 
+from app.db.session import s
 from app.db.models.base import Base
-
+from app.db.models import Course, Student
 
 M = t.TypeVar('M', bound=Base)
 T = t.TypeVar('T', bound=BaseModel)
@@ -18,3 +20,20 @@ def set_value_to_model(
         if hasattr(model, field):
             setattr(model, field, value)
     return model
+
+
+def get_course_by_ids(course_ids: list[int]) -> list[Course]:
+    """This functions returns courses by provided ids"""
+    statement = (
+        select(Course)
+        .where(Course.id.in_(course_ids))
+    )
+    return s.user_db.scalars(statement).all()
+
+
+def get_student_by_ids(student_ids: list[int]) -> list[Student]:
+    """This function returns students by provided ids"""
+    students = s.user_db.scalars(
+        select(Student).where(Student.id.in_(student_ids))
+    ).all()
+    return students

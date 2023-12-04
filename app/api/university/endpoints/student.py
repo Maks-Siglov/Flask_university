@@ -87,7 +87,7 @@ class StudentApi(Resource):
             return Response(f"Student with id {student_id} don't exist", 404)
         return StudentResponse.model_validate(student).model_dump()
 
-    def post(self) -> Response:
+    def post(self) -> dict[str, Any] | Response:
         """
         This method add a new student to the database
         ---
@@ -105,12 +105,12 @@ class StudentApi(Resource):
             description: Invalid types in requests
         """
         try:
-            student = StudentRequest(**request.get_json())
+            student_data = StudentRequest(**request.get_json())
+            student = add_student(student_data)
         except ValidationError as exc:
             return Response(f'Not valid data, {exc}', status=422)
 
-        student_id = add_student(student)
-        return Response(f'id = {student_id}', status=201)
+        return student.to_dict(exclude={'group, course'})
 
     def patch(self, student_id: int):
         """
@@ -128,17 +128,18 @@ class StudentApi(Resource):
           422:
             description: Not valid data for updating
         """
+        append = request.args.get('append', default=False, type=bool)
+        remove = request.args.get('remove', default=False, type=bool)
         student = get_student(student_id)
         if not student:
             return Response(f"Student with id {student_id} doesn't exist", 404)
 
-        data = request.get_json()
         try:
-            data = StudentRequest(**data)
+            request_data = StudentRequest(**request.get_json())
         except ValidationError as exc:
             return Response(f'Not valid data, {exc}', status=422)
 
-        update_student(student, data)
+        update_student(student, request_data, append, remove)
         return Response(
             f'Student with id {student_id} updated successfully', status=200
         )
@@ -157,8 +158,9 @@ class StudentApi(Resource):
           404:
             description: Student don't exist
         """
+        student = get_student(student_id)
         if not get_student(student_id):
             return Response(f"Student {student_id} don't exist", status=404)
 
-        delete_student(student_id)
+        delete_student(student)
         return Response(None, status=204)
