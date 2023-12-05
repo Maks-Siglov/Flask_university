@@ -99,8 +99,7 @@ student_to_group_json = {'student_ids': [1]}
 
 def test_remove_students_from_group(client):
     response = client.patch(
-        'api/v1/group/1/remove',
-        json=student_to_group_json
+        'api/v1/group/1/remove', json=student_to_group_json
     )
     assert response.status_code == 200
     group = get_group(1)
@@ -109,12 +108,24 @@ def test_remove_students_from_group(client):
 
 def test_append_students_to_group(client):
     response = client.patch(
-        'api/v1/group/1/append',
-        json=student_to_group_json
+        'api/v1/group/1/append', json=student_to_group_json
     )
     assert response.status_code == 200
     group = get_group(1)
     assert len(group.students) == 1
+
+
+put_group_json = {
+    'name': 'PT-22',
+    'student_ids': [1, 2, 3]
+}
+
+
+def test_put_group(client):
+    response = client.put(f'{API_PREFIX}/group/1', json=put_group_json)
+    assert response.status_code == 200
+    putted_group = get_group_by_name('PT-22')
+    assert len(putted_group.students) == 3
 
 
 def test_delete_group(client):

@@ -112,10 +112,7 @@ def test_course_append_students(client):
 
 
 def test_course_append_duplicated_students(client):
-    client.patch(
-        f'{API_PREFIX}/course/3/append',
-        json=append_students_json
-    )
+    client.patch(f'{API_PREFIX}/course/3/append', json=append_students_json)
     pytest.raises(ValueError)
 
 
@@ -133,11 +130,22 @@ def test_course_remove_students(client):
 
 
 def test_course_remove_not_existed_students(client):
-    client.patch(
-        f'{API_PREFIX}/course/3/remove',
-        json=remove_students_json
-    )
+    client.patch(f'{API_PREFIX}/course/3/remove', json=remove_students_json)
     pytest.raises(ValueError)
+
+
+put_course_json = {
+    'name': 'Updated put course',
+    'description': 'Updated put description',
+    'student_ids': [1, 2, 3]
+}
+
+
+def test_put_course(client):
+    response = client.put(f'{API_PREFIX}/course/1', json=put_course_json)
+    assert response.status_code == 200
+    putted_course = get_course_by_name('Updated put course')
+    assert len(putted_course.students) == 3
 
 
 def test_delete_course(client):

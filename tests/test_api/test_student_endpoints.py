@@ -76,3 +76,21 @@ def test_remove_student(client, student_id):
 def test_remove_un_exist_student(client, student_id=100):
     response = client.delete(f'/api/v1/student/{student_id}')
     assert response.status_code == 404
+
+
+put_student_json = {
+    'first_name': 'David',
+    'last_name': 'Smith',
+    'group_id': 2,
+    'course_ids': [1, 2]
+}
+
+
+def test_put_student(client):
+    response = client.put(f'{API_PREFIX}/student/1', json=put_student_json)
+    assert response.status_code == 200
+    putted_student = get_student(1)
+    assert putted_student.first_name == 'David'
+    assert putted_student.last_name == 'Smith'
+    assert putted_student.group_id == 2
+    assert len(putted_student.courses) == 2
