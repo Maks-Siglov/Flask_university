@@ -14,11 +14,7 @@ from app.db.session import s
 
 def get_all_courses() -> list[Course]:
     """This function returns all courses"""
-    statement = (
-        select(Course).options(
-            selectinload(Course.students)
-        )
-    )
+    statement = select(Course).options(selectinload(Course.students))
     return s.user_db.scalars(statement).all()
 
 
@@ -31,7 +27,7 @@ def get_course(course_id: int) -> Course | None:
 
 def add_course(course_data: CourseRequest) -> Course:
     """This function create course and insert it to the database"""
-    course = Course(**course_data.model_dump(exclude={'student_ids'}))
+    course = Course(**course_data.model_dump(exclude={"student_ids"}))
 
     if course_data.student_ids:
         students = get_student_by_ids(course_data.student_ids)
@@ -44,20 +40,18 @@ def add_course(course_data: CourseRequest) -> Course:
 
 
 def update_course(
-        course: Course, request_data: CourseRequest, action: str | None
+    course: Course, request_data: CourseRequest, action: str | None
 ) -> None:
     """This function update course by provided data"""
-    course = set_value_to_model(course, request_data, exclude={'students_ids'})
+    course = set_value_to_model(course, request_data, exclude={"students_ids"})
     if request_data.student_ids:
-        if action == 'append':
+        if action == "append":
             _add_students_to_course(course, request_data.student_ids)
-        if action == 'remove':
+        if action == "remove":
             _remove_students_from_course(course, request_data.student_ids)
 
 
-def _add_students_to_course(
-        course: Course, student_ids: list[int]
-) -> None:
+def _add_students_to_course(course: Course, student_ids: list[int]) -> None:
     """This function selects students by provided ids, if student already
     persist on course ValueError raised, after check we add students to course
     """
@@ -65,16 +59,16 @@ def _add_students_to_course(
     for student in new_students:
         if student in course.students:
             raise ValueError(
-                f'Student {student.id} already assigned to {course.name}'
+                f"Student {student.id} already assigned to {course.name}"
             )
     course.students.extend(new_students)
 
 
 def _remove_students_from_course(
-        course: Course, student_ids: list[int]
+    course: Course, student_ids: list[int]
 ) -> None:
     """This function selects students by provided ids, if student don't persist
-     on course ValueError raised, after check we remove student from course
+    on course ValueError raised, after check we remove student from course
     """
     removed_students = get_student_by_ids(student_ids)
     for student in removed_students:
@@ -87,7 +81,7 @@ def _remove_students_from_course(
 
 def overwrite_course(course: Course, request_data: CourseRequest) -> None:
     """This function entirely update the course"""
-    course = set_value_to_model(course, request_data, exclude={'students_ids'})
+    course = set_value_to_model(course, request_data, exclude={"students_ids"})
     course.students.clear()
     students = get_student_by_ids(request_data.student_ids)
     course.students.extend(students)

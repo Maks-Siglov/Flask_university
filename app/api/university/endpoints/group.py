@@ -1,7 +1,7 @@
 from typing import Any
 from flask import (
     Response,
-    request
+    request,
 )
 from flask_restful import Resource
 from pydantic import ValidationError
@@ -17,7 +17,7 @@ from app.crud.university.group import (
     add_group,
     update_group,
     delete_group,
-    overwrite_group
+    overwrite_group,
 )
 
 
@@ -45,7 +45,7 @@ class GroupStudentAmountApi(Resource):
         """
         groups = less_or_equal_students_in_group(student_amount)
         if not groups:
-            return Response('There is no group with that amount', 404)
+            return Response("There is no group with that amount", 404)
         return [
             GroupResponse.model_validate(group).model_dump()
             for group in groups
@@ -62,9 +62,9 @@ class GroupsApi(Resource):
             description: returns all groups or empty list if entity don't exist
         """
         with_students = request.args.get(
-            'with_students', default=False, type=bool
+            "with_students", default=False, type=bool
         )
-        exclude = {} if with_students else {'students'}
+        exclude = {} if with_students else {"students"}
         groups = get_all_groups()
         return [
             GroupResponse.model_validate(group).model_dump(exclude=exclude)
@@ -121,7 +121,7 @@ class GroupApi(Resource):
             group_data = GroupRequest(**request.get_json())
             group = add_group(group_data)
         except ValidationError as exc:
-            return Response(f'Not valid data, {exc}', status=422)
+            return Response(f"Not valid data, {exc}", status=422)
 
         return Response(
             GroupResponse.model_validate(group).model_dump_json(), 201
@@ -153,11 +153,11 @@ class GroupApi(Resource):
         try:
             request_data = GroupRequest(**request.get_json())
         except ValueError as exc:
-            return Response(f'Not valid data, {exc}', status=422)
+            return Response(f"Not valid data, {exc}", status=422)
 
         update_group(group, request_data, action)
         return Response(
-            f'Group with id {group_id} updated successfully', status=200
+            f"Group with id {group_id} updated successfully", status=200
         )
 
     def put(self, group_id: int):
@@ -184,11 +184,11 @@ class GroupApi(Resource):
             request_data = GroupRequest(**request.get_json())
             request_data.check_not_none_field()
         except ValueError as exc:
-            return Response(f'Not valid data, {exc}', status=422)
+            return Response(f"Not valid data, {exc}", status=422)
 
         overwrite_group(group, request_data)
         return Response(
-            f'Group with id {group_id} updated successfully', status=200
+            f"Group with id {group_id} updated successfully", status=200
         )
 
     def delete(self, group_id: int):

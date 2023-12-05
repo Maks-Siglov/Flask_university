@@ -7,7 +7,7 @@ class MyBaseModel(BaseModel):
 
     def check_not_none_field(self):
         if any(value is None for value in self.model_dump().values()):
-            raise ValueError('All fields must be provided')
+            raise ValueError("All fields must be provided")
 
 
 class StudentRequest(MyBaseModel):
@@ -21,8 +21,8 @@ class StudentResponse(MyBaseModel):
     id: int
     first_name: str | None = None
     last_name: str | None = None
-    group: Union['GroupResponse', None] = None
-    courses: list['CourseResponse'] | None = None
+    group: Union["GroupResponse", None] = None
+    courses: list["CourseResponse"] | None = None
 
 
 class StudentResponse2(MyBaseModel):

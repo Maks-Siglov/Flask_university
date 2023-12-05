@@ -1,15 +1,9 @@
 from typing import Any
-from flask import (
-    Response,
-    request
-)
+from flask import Response, request
 from flask_restful import Resource
 from pydantic import ValidationError
 
-from app.api.university.models import (
-    CourseRequest,
-    CourseResponse
-)
+from app.api.university.models import CourseRequest, CourseResponse
 from app.crud.university.course import (
     get_course,
     add_course,
@@ -60,9 +54,9 @@ class CoursesApi(Resource):
                 ]
         """
         with_students = request.args.get(
-            'with_students', default=False, type=bool
+            "with_students", default=False, type=bool
         )
-        exclude = {} if with_students else {'students'}
+        exclude = {} if with_students else {"students"}
 
         courses = get_all_courses()
         return [
@@ -121,7 +115,7 @@ class CourseApi(Resource):
             course_data = CourseRequest(**request.get_json())
             course = add_course(course_data)
         except (ValidationError, ValueError) as exc:
-            return Response(f'Not valid data, {exc}', status=422)
+            return Response(f"Not valid data, {exc}", status=422)
 
         return Response(
             CourseResponse.model_validate(course).model_dump_json(), 201
@@ -153,11 +147,11 @@ class CourseApi(Resource):
         try:
             request_data = CourseRequest(**request.get_json())
         except ValidationError as exc:
-            return Response(f'Not valid data, {exc}', status=422)
+            return Response(f"Not valid data, {exc}", status=422)
 
         update_course(course, request_data, action)
         return Response(
-            f'Course with id {course_id} updated successfully', status=200
+            f"Course with id {course_id} updated successfully", status=200
         )
 
     def put(self, course_id: int) -> Response:
@@ -187,11 +181,11 @@ class CourseApi(Resource):
             request_data = CourseRequest(**request.get_json())
             request_data.check_not_none_field()
         except ValidationError as exc:
-            return Response(f'Not valid data, {exc}', status=422)
+            return Response(f"Not valid data, {exc}", status=422)
 
         overwrite_course(course, request_data)
         return Response(
-            f'Course with id {course_id} updated successfully', status=200
+            f"Course with id {course_id} updated successfully", status=200
         )
 
     def delete(self, course_id: int):

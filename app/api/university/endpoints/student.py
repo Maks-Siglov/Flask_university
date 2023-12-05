@@ -1,8 +1,5 @@
 from typing import Any
-from flask import (
-    Response,
-    request
-)
+from flask import Response, request
 from flask_restful import Resource
 from pydantic import ValidationError
 
@@ -14,7 +11,7 @@ from app.crud.university.student import (
     update_student,
     delete_student,
     get_student,
-    overwrite_student
+    overwrite_student,
 )
 
 
@@ -109,9 +106,9 @@ class StudentApi(Resource):
             student_data = StudentRequest(**request.get_json())
             student = add_student(student_data)
         except ValidationError as exc:
-            return Response(f'Not valid data, {exc}', status=422)
+            return Response(f"Not valid data, {exc}", status=422)
 
-        return student.to_dict(exclude={'group, course'})
+        return student.to_dict(exclude={"group, course"})
 
     def patch(self, student_id: int, action: str | None = None):
         """
@@ -139,11 +136,11 @@ class StudentApi(Resource):
         try:
             request_data = StudentRequest(**request.get_json())
         except ValidationError as exc:
-            return Response(f'Not valid data, {exc}', status=422)
+            return Response(f"Not valid data, {exc}", status=422)
 
         update_student(student, request_data, action)
         return Response(
-            f'Student with id {student_id} updated successfully', status=200
+            f"Student with id {student_id} updated successfully", status=200
         )
 
     def put(self, student_id: int):
@@ -170,11 +167,11 @@ class StudentApi(Resource):
             request_data = StudentRequest(**request.get_json())
             request_data.check_not_none_field()
         except ValidationError as exc:
-            return Response(f'Not valid data, {exc}', status=422)
+            return Response(f"Not valid data, {exc}", status=422)
 
         overwrite_student(student, request_data)
         return Response(
-            f'Student with id {student_id} updated successfully', status=200
+            f"Student with id {student_id} updated successfully", status=200
         )
 
     def delete(self, student_id: int) -> Response:

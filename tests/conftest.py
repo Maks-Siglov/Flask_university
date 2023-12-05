@@ -18,15 +18,15 @@ from app.db.utils import (
 )
 from tests.data_for_test_db import load_test_db
 
-BASE_SUPERUSER_URL = f'{BASE_URL}/{POSTGRESS_DB}'
+BASE_SUPERUSER_URL = f"{BASE_URL}/{POSTGRESS_DB}"
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def app():
     yield create_app()
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def client(app):
     return app.test_client()
 
@@ -45,9 +45,9 @@ def pytest_sessionfinish(session, exitstatus):
     try:
         close_dbs()
     finally:
-        print('\nClose DB')
+        print("\nClose DB")
 
     try:
         drop_database(BASE_SUPERUSER_URL, DB_NAME)
     finally:
-        print(f'DROP DB {DB_NAME}')
+        print(f"DROP DB {DB_NAME}")

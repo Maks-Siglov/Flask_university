@@ -30,9 +30,9 @@ class EnginePool:
 
 session_pools: dict[str, EnginePool] = {}
 
-user_db = ContextVar[Session]('user_db')
+user_db = ContextVar[Session]("user_db")
 user_db_transaction = ContextVar[SessionTransaction | None](
-    'user_db_transaction', default=None
+    "user_db_transaction", default=None
 )
 
 
@@ -41,9 +41,9 @@ class SessionExcept(Exception):
 
 
 def set_session() -> None:
-    current_pool = get_sync_pool(f'{BASE_URL}/{DB_NAME}', ENGINE_OPTIONS)
+    current_pool = get_sync_pool(f"{BASE_URL}/{DB_NAME}", ENGINE_OPTIONS)
     s.user_db = current_pool.maker()
-    s.user_db.connection(execution_options={'isolation_level': 'AUTOCOMMIT'})
+    s.user_db.connection(execution_options={"isolation_level": "AUTOCOMMIT"})
 
 
 def get_sync_pool(db_url: str, options: dict) -> EnginePool:
@@ -64,9 +64,9 @@ def _check_connection(engine: Engine) -> None:
     try:
         with engine.connect() as conn:
             conn.execute(select(1))
-            log.info('Connection success')
+            log.info("Connection success")
     except Exception as e:
-        log.info('During check connection error occurred')
+        log.info("During check connection error occurred")
         raise SessionExcept(e)
 
 
@@ -79,7 +79,7 @@ def pop_session() -> None:
         s.user_db.commit()
     except Exception as e:
         s.user_db.rollback()
-        log.error(f'During session error occurred {str(e)}.Session ROLLBACK ')
+        log.error(f"During session error occurred {str(e)}.Session ROLLBACK ")
     finally:
         s.user_db.close()
 

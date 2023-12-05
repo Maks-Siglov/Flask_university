@@ -6,16 +6,16 @@ from app.db.session import s
 from app.db.models.base import Base
 from app.db.models import Course, Student
 
-M = t.TypeVar('M', bound=Base)
-T = t.TypeVar('T', bound=BaseModel)
+M = t.TypeVar("M", bound=Base)
+T = t.TypeVar("T", bound=BaseModel)
 
 
 def set_value_to_model(
-        model: M, request_data: T, exclude: set[str] | None = None
+    model: M, request_data: T, exclude: set[str] | None = None
 ) -> M:
     """This function set value of request data to model"""
     for field, value in request_data.model_dump(
-            exclude=exclude, exclude_none=True
+        exclude=exclude, exclude_none=True
     ).items():
         if hasattr(model, field):
             setattr(model, field, value)
@@ -24,10 +24,7 @@ def set_value_to_model(
 
 def get_course_by_ids(course_ids: list[int]) -> list[Course]:
     """This functions returns courses by provided ids"""
-    statement = (
-        select(Course)
-        .where(Course.id.in_(course_ids))
-    )
+    statement = select(Course).where(Course.id.in_(course_ids))
     return s.user_db.scalars(statement).all()
 
 

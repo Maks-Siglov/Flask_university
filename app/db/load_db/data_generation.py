@@ -1,10 +1,7 @@
 import random
 import string
 
-from app.configs import (
-    GROUPS_AMOUNT,
-    STUDENTS_AMOUNT
-)
+from app.configs import GROUPS_AMOUNT, STUDENTS_AMOUNT
 from app.db.load_db.data_for_generation import (
     COURSES,
     STUDENT_FIRS_NAMES,
@@ -27,9 +24,7 @@ def load_db() -> None:
     courses = _create_course()
 
     for student in students:
-        student.courses.extend(
-            random.sample(courses, random.randint(1, 3))
-        )
+        student.courses.extend(random.sample(courses, random.randint(1, 3)))
 
     assigned_students = []
 
@@ -53,7 +48,8 @@ def _create_students() -> list[Student]:
         Student(
             first_name=random.choice(STUDENT_FIRS_NAMES),
             last_name=random.choice(STUDENT_LAST_NAMES),
-        ) for _ in range(STUDENTS_AMOUNT)
+        )
+        for _ in range(STUDENTS_AMOUNT)
     ]
 
 

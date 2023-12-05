@@ -5,34 +5,23 @@ from app.db.models import (
     Group,
 )
 
-COURSE_ONE = {
-    'name': 'course_one_student', 'description': 'Description 1'
-}
-COURSE_TWO = {
-    'name': 'course_two_student', 'description': 'Description 2'
-}
+COURSE_ONE = {"name": "course_one_student", "description": "Description 1"}
+COURSE_TWO = {"name": "course_two_student", "description": "Description 2"}
 COURSE_WITHOUT_STUDENT = {
-    'name': 'course_without_student', 'description': 'Description 3'
+    "name": "course_without_student",
+    "description": "Description 3",
 }
 
 
-Group_ONE = {'name': 'TT-31'}
-GROUT_TWO = {'name': 'FF-22'}
-GROUT_WITHOUT_STUDENT = {'name': 'AG-73'}
+Group_ONE = {"name": "TT-31"}
+GROUT_TWO = {"name": "FF-22"}
+GROUT_WITHOUT_STUDENT = {"name": "AG-73"}
 
 
-STUDENT_ONE = {
-    'first_name': 'John', 'last_name': 'Doe'
-}
-STUDENT_TWO = {
-    'first_name': 'Jane', 'last_name': 'Doe'
-}
-STUDENT_THREE = {
-    'first_name': 'Olivia', 'last_name': 'Thomas'
-}
-STUDENT_WITHOUT_COURSE = {
-  'first_name': 'Alice', 'last_name': 'Wonderland'
-}
+STUDENT_ONE = {"first_name": "John", "last_name": "Doe"}
+STUDENT_TWO = {"first_name": "Jane", "last_name": "Doe"}
+STUDENT_THREE = {"first_name": "Olivia", "last_name": "Thomas"}
+STUDENT_WITHOUT_COURSE = {"first_name": "Alice", "last_name": "Wonderland"}
 
 
 def load_test_db() -> None:
@@ -57,7 +46,11 @@ def load_test_db() -> None:
 
     s.user_db.add_all(
         [
-            student_one, student_two, student_without_course,
-            course_without_student, student_three, group_without_students
+            student_one,
+            student_two,
+            student_without_course,
+            course_without_student,
+            student_three,
+            group_without_students,
         ]
     )

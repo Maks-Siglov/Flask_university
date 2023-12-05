@@ -11,7 +11,7 @@ from sqlalchemy.orm import (
 
 from app.db.models.base import Base
 from app.db.models.student_course_association import (
-    StudentCourseAssociationTable
+    StudentCourseAssociationTable,
 )
 
 if TYPE_CHECKING:
@@ -19,32 +19,32 @@ if TYPE_CHECKING:
 
 
 class Course(Base):
-    __tablename__ = 'courses'
+    __tablename__ = "courses"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
     name: Mapped[str] = mapped_column(unique=True)
     description: Mapped[str] = mapped_column()
 
-    students: Mapped[list['Student']] = relationship(
+    students: Mapped[list["Student"]] = relationship(
         secondary=StudentCourseAssociationTable.__table__,
-        back_populates='courses'
+        back_populates="courses",
     )
 
     def to_dict(self, exclude: set[str] | None = None) -> dict[str, Any]:
         if exclude is None:
             exclude = set()
         course_dict = {
-            'id': self.id,
-            'name': self.name,
-            'description': self.description,
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
         }
-        if 'students' not in exclude:
-            course_dict['students'] = [
-                s.to_dict(exclude={'course', 'group'}) for s in self.students
+        if "students" not in exclude:
+            course_dict["students"] = [
+                s.to_dict(exclude={"course", "group"}) for s in self.students
             ]
 
         return course_dict
 
     def __repr__(self) -> str:
-        return f'Course({self.id}, {self.name}, {self.description})'
+        return f"Course({self.id}, {self.name}, {self.description})"
