@@ -7,7 +7,7 @@ from sqlalchemy.orm import (
 
 from app.crud.university.utils import set_value_to_model, get_course_by_ids
 from app.crud.university.group import get_group
-from app.api.university.models import StudentRequest
+from app.api.university.api_models.student import StudentRequest
 from app.db.models import Student
 from app.db.session import s
 

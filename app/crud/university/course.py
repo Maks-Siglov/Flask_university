@@ -5,7 +5,7 @@ from sqlalchemy.orm import (
     joinedload,
 )
 
-from app.api.university.models import CourseRequest
+from app.api.university.api_models.course import CourseRequest
 from app.crud.university.utils import set_value_to_model, get_student_by_ids
 from app.db.models import Course
 
