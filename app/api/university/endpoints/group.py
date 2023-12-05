@@ -6,7 +6,7 @@ from flask import (
 from flask_restful import Resource
 from pydantic import ValidationError
 
-from app.api.university.models import (
+from app.api.university.api_models.group import (
     GroupRequest,
     GroupResponse,
 )

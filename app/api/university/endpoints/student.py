@@ -3,7 +3,7 @@ from flask import Response, request
 from flask_restful import Resource
 from pydantic import ValidationError
 
-from app.api.university.models import StudentRequest, StudentResponse
+from app.api.university.api_models.student import StudentRequest, StudentResponse
 
 from app.crud.university.student import (
     get_all_students,
