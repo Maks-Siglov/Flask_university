@@ -17,6 +17,7 @@ from app.crud.university.group import (
     add_group,
     update_group,
     delete_group,
+    overwrite_group
 )
 
 
@@ -126,7 +127,40 @@ class GroupApi(Resource):
             GroupResponse.model_validate(group).model_dump_json(), 201
         )
 
-    def patch(self, group_id: int):
+    def patch(self, group_id: int, action: str | None = None):
+        """
+        This method update group in the database by group_id
+        ---
+        parameters:
+          - name: group_id
+            in: path
+            type: int
+          - name: action
+            in: path
+            type: str
+        responses:
+          200:
+            description: Group updated successfully
+          404:
+            description: Group don't exist
+          422:
+            description: Not valid data for updating
+        """
+        group = get_group(group_id)
+        if not group:
+            return Response(f"Group with id {group_id} doesn't exist", 404)
+
+        try:
+            request_data = GroupRequest(**request.get_json())
+        except ValueError as exc:
+            return Response(f'Not valid data, {exc}', status=422)
+
+        update_group(group, request_data, action)
+        return Response(
+            f'Group with id {group_id} updated successfully', status=200
+        )
+
+    def put(self, group_id: int):
         """
         This method update group in the database by group_id
         ---
@@ -142,18 +176,17 @@ class GroupApi(Resource):
           422:
             description: Not valid data for updating
         """
-        append = request.args.get('append', default=False, type=bool)
-        remove = request.args.get('remove', default=False, type=bool)
         group = get_group(group_id)
         if not group:
             return Response(f"Group with id {group_id} doesn't exist", 404)
 
         try:
             request_data = GroupRequest(**request.get_json())
+            request_data.check_not_none_field()
         except ValueError as exc:
             return Response(f'Not valid data, {exc}', status=422)
 
-        update_group(group, request_data, append, remove)
+        overwrite_group(group, request_data)
         return Response(
             f'Group with id {group_id} updated successfully', status=200
         )

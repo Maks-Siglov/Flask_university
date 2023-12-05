@@ -50,10 +50,7 @@ def add_student(student_data: StudentRequest) -> Student:
 
 
 def update_student(
-        student: Student,
-        request_data: StudentRequest,
-        append: bool,
-        remove: bool
+        student: Student, request_data: StudentRequest, action: str | None
 ) -> None:
     """This function update student by provided data"""
     student = set_value_to_model(
@@ -62,26 +59,26 @@ def update_student(
 
     if request_data.group_id:
         _change_student_group(
-            student, request_data.group_id, append, remove
+            student, request_data.group_id, action
         )
 
     if request_data.course_ids:
         _update_student_courses(
-            student, request_data.course_ids, append, remove
+            student, request_data.course_ids, action
         )
 
 
 def _change_student_group(
-        student: Student, group_id: int, append: bool, remove: bool
+        student: Student, group_id: int, action: str | None
 ) -> None:
-    if append:
+    if action == 'append':
         if student.group:
             raise ValueError(
                 f'Student {student.id} already assigned to {student.group}'
             )
         student.group = get_group(group_id)
 
-    if remove:
+    if action == 'remove':
         if not student.group_id == group_id:
             raise ValueError(
                 f'Student {student.id} not in group {group_id}'
@@ -90,10 +87,10 @@ def _change_student_group(
 
 
 def _update_student_courses(
-        student: Student, course_ids: list[int], append: bool, remove: bool
+        student: Student, course_ids: list[int], action: str | None
 ) -> None:
     courses = get_course_by_ids(course_ids)
-    if append:
+    if action == 'append':
         for course in courses:
             if course in student.courses:
                 raise ValueError(
@@ -101,13 +98,26 @@ def _update_student_courses(
                 )
             student.courses.extend(courses)
 
-    if remove:
+    if action == 'remove':
         for course in courses:
             if course not in student.courses:
                 raise ValueError(
                     f"Student {student.id} don't assign to {course}"
                 )
             student.courses.remove(course)
+
+
+def overwrite_student(student: Student, request_data: StudentRequest):
+    """This function entirely change the student in the database"""
+    student = set_value_to_model(
+        student, request_data, exclude={'group_id', 'course_ids'}
+    )
+    student.courses.clear()
+    courses = get_course_by_ids(request_data.course_ids)
+    student.courses.extend(courses)
+
+    new_group = get_group(request_data.group_id)
+    student.group = new_group
 
 
 def delete_student(student: Student) -> None:

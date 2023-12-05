@@ -99,8 +99,7 @@ student_to_group_json = {'student_ids': [1]}
 
 def test_remove_students_from_group(client):
     response = client.patch(
-        'api/v1/group/1',
-        query_string={'remove': True},
+        'api/v1/group/1/remove',
         json=student_to_group_json
     )
     assert response.status_code == 200
@@ -110,8 +109,7 @@ def test_remove_students_from_group(client):
 
 def test_append_students_to_group(client):
     response = client.patch(
-        'api/v1/group/1',
-        query_string={'append': True},
+        'api/v1/group/1/append',
         json=student_to_group_json
     )
     assert response.status_code == 200

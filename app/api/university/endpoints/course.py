@@ -16,6 +16,7 @@ from app.crud.university.course import (
     update_course,
     delete_course,
     get_all_courses,
+    overwrite_course,
 )
 
 
@@ -126,7 +127,7 @@ class CourseApi(Resource):
             CourseResponse.model_validate(course).model_dump_json(), 201
         )
 
-    def patch(self, course_id: int):
+    def patch(self, course_id: int, action: str | None = None) -> Response:
         """
         This method update course in the database by course_id
         ---
@@ -134,6 +135,9 @@ class CourseApi(Resource):
           - name: course_id
             in: path
             type: int
+        - name: action
+            in: path
+            type: str
         responses:
           200:
             description: Course updated successfully
@@ -142,8 +146,6 @@ class CourseApi(Resource):
           422:
             description: Not valid data for updating
         """
-        append = request.args.get('append', default=False, type=bool)
-        remove = request.args.get('remove', default=False, type=bool)
         course = get_course(course_id)
         if not course:
             return Response(f"Course with id {course_id} doesn't exist", 404)
@@ -153,7 +155,41 @@ class CourseApi(Resource):
         except ValidationError as exc:
             return Response(f'Not valid data, {exc}', status=422)
 
-        update_course(course, request_data, append, remove)
+        update_course(course, request_data, action)
+        return Response(
+            f'Course with id {course_id} updated successfully', status=200
+        )
+
+    def put(self, course_id: int) -> Response:
+        """
+        This method update entire course in the database by course_id
+        ---
+        parameters:
+          - name: course_id
+            in: path
+            type: int
+        - name: action
+            in: path
+            type: str
+        responses:
+          200:
+            description: Course updated successfully
+          404:
+            description: Course don't exist
+          422:
+            description: Not valid data for updating
+        """
+        course = get_course(course_id)
+        if not course:
+            return Response(f"Course with id {course_id} doesn't exist", 404)
+
+        try:
+            request_data = CourseRequest(**request.get_json())
+            request_data.check_not_none_field()
+        except ValidationError as exc:
+            return Response(f'Not valid data, {exc}', status=422)
+
+        overwrite_course(course, request_data)
         return Response(
             f'Course with id {course_id} updated successfully', status=200
         )

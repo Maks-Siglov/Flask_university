@@ -44,14 +44,14 @@ def add_course(course_data: CourseRequest) -> Course:
 
 
 def update_course(
-        course: Course, request_data: CourseRequest, append: bool, remove: bool
+        course: Course, request_data: CourseRequest, action: str | None
 ) -> None:
     """This function update course by provided data"""
     course = set_value_to_model(course, request_data, exclude={'students_ids'})
     if request_data.student_ids:
-        if append:
+        if action == 'append':
             _add_students_to_course(course, request_data.student_ids)
-        if remove:
+        if action == 'remove':
             _remove_students_from_course(course, request_data.student_ids)
 
 
@@ -83,6 +83,14 @@ def _remove_students_from_course(
                 f"Student {student.id} don't persist in {course.name}"
             )
         course.students.remove(student)
+
+
+def overwrite_course(course: Course, request_data: CourseRequest) -> None:
+    """This function entirely update the course"""
+    course = set_value_to_model(course, request_data, exclude={'students_ids'})
+    course.students.clear()
+    students = get_student_by_ids(request_data.student_ids)
+    course.students.extend(students)
 
 
 def delete_course(course: Course) -> None:

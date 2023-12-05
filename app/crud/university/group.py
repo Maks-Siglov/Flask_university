@@ -5,7 +5,10 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import joinedload
 
-from app.crud.university.utils import set_value_to_model, get_student_by_ids
+from app.crud.university.utils import (
+    set_value_to_model,
+    get_student_by_ids
+)
 from app.api.university.models import GroupRequest
 from app.db.models import Group
 from app.db.session import s
@@ -70,14 +73,14 @@ def add_group(group_data: GroupRequest) -> Group:
 
 
 def update_group(
-        group: Group, request_data: GroupRequest, append: bool, remove: bool
+        group: Group, request_data: GroupRequest, action: str | None
 ) -> None:
     """This function updates group by provided data"""
     group = set_value_to_model(group, request_data, exclude={'student_ids'})
     if request_data.student_ids:
-        if append:
+        if action == 'append':
             _add_students_to_group(group, request_data.student_ids)
-        if remove:
+        if action == 'remove':
             _remove_students_from_group(group, request_data.student_ids)
 
 
@@ -109,6 +112,14 @@ def _remove_students_from_group(
                 f"Student {student.id} don't persist in {group.name}"
             )
         group.students.remove(student)
+
+
+def overwrite_group(group: Group, request_data: GroupRequest) -> None:
+    """This function overwrites group in the database"""
+    group = set_value_to_model(group, request_data, exclude={'student_ids'})
+    group.students.clear()
+    students = get_student_by_ids(request_data.student_ids)
+    group.students.extend(students)
 
 
 def delete_group(group: Group) -> None:

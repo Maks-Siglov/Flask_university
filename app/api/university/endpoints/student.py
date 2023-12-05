@@ -14,6 +14,7 @@ from app.crud.university.student import (
     update_student,
     delete_student,
     get_student,
+    overwrite_student
 )
 
 
@@ -112,7 +113,40 @@ class StudentApi(Resource):
 
         return student.to_dict(exclude={'group, course'})
 
-    def patch(self, student_id: int):
+    def patch(self, student_id: int, action: str | None = None):
+        """
+        This method update student in the database by student_id
+        ---
+        parameters:
+          - name: student_id
+            in: path
+            type: int
+          - name: action
+            in: path
+            type: str
+        responses:
+          200:
+            description: Student updated successfully
+          404:
+            description: Student don't exist
+          422:
+            description: Not valid data for updating
+        """
+        student = get_student(student_id)
+        if not student:
+            return Response(f"Student with id {student_id} doesn't exist", 404)
+
+        try:
+            request_data = StudentRequest(**request.get_json())
+        except ValidationError as exc:
+            return Response(f'Not valid data, {exc}', status=422)
+
+        update_student(student, request_data, action)
+        return Response(
+            f'Student with id {student_id} updated successfully', status=200
+        )
+
+    def put(self, student_id: int):
         """
         This method update student in the database by student_id
         ---
@@ -128,18 +162,17 @@ class StudentApi(Resource):
           422:
             description: Not valid data for updating
         """
-        append = request.args.get('append', default=False, type=bool)
-        remove = request.args.get('remove', default=False, type=bool)
         student = get_student(student_id)
         if not student:
             return Response(f"Student with id {student_id} doesn't exist", 404)
 
         try:
             request_data = StudentRequest(**request.get_json())
+            request_data.check_not_none_field()
         except ValidationError as exc:
             return Response(f'Not valid data, {exc}', status=422)
 
-        update_student(student, request_data, append, remove)
+        overwrite_student(student, request_data)
         return Response(
             f'Student with id {student_id} updated successfully', status=200
         )

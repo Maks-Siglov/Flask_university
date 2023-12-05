@@ -103,9 +103,8 @@ append_students_json = {"student_ids": [1, 2, 3]}
 
 def test_course_append_students(client):
     response = client.patch(
-        f'{API_PREFIX}/course/3',
-        json=append_students_json,
-        query_string={'append': True}
+        f'{API_PREFIX}/course/3/append',
+        json=append_students_json
     )
     assert response.status_code == 200
     updated_course = get_course(3)
@@ -114,9 +113,8 @@ def test_course_append_students(client):
 
 def test_course_append_duplicated_students(client):
     client.patch(
-        f'{API_PREFIX}/course/3',
-        json=append_students_json,
-        query_string={'append': True}
+        f'{API_PREFIX}/course/3/append',
+        json=append_students_json
     )
     pytest.raises(ValueError)
 
@@ -126,9 +124,8 @@ remove_students_json = {"student_ids": [1, 2, 3]}
 
 def test_course_remove_students(client):
     response = client.patch(
-        f'{API_PREFIX}/course/3',
-        json=remove_students_json,
-        query_string={'remove': True}
+        f'{API_PREFIX}/course/3/remove',
+        json=remove_students_json
     )
     assert response.status_code == 200
     updated_course = get_course(3)
@@ -137,9 +134,8 @@ def test_course_remove_students(client):
 
 def test_course_remove_not_existed_students(client):
     client.patch(
-        f'{API_PREFIX}/course/3',
-        json=remove_students_json,
-        query_string={'remove': True}
+        f'{API_PREFIX}/course/3/remove',
+        json=remove_students_json
     )
     pytest.raises(ValueError)
 
