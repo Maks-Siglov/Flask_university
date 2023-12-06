@@ -87,7 +87,7 @@ def _update_student_courses(
                 raise ValueError(
                     f"Student {student.id} already assigned to {course}"
                 )
-            student.courses.extend(courses)
+        student.courses.extend(courses)
 
     if action == "remove":
         for course in courses:
