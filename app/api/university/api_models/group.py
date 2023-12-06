@@ -3,7 +3,7 @@ import typing as t
 from app.api.university.api_models.base import MyBaseModel
 
 if t.TYPE_CHECKING:
-    from .student import StudentResponse
+    from app.api.university.api_models.student import StudentResponse
 
 
 class GroupRequest(MyBaseModel):
@@ -14,4 +14,4 @@ class GroupRequest(MyBaseModel):
 class GroupResponse(MyBaseModel):
     id: int
     name: str
-    students: list["StudentResponse"] | None = None
+    students: t.Optional[list["StudentResponse"]] = None

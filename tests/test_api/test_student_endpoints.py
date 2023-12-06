@@ -1,6 +1,5 @@
-import json
-
 import pytest
+import json
 
 from app.crud.university.student import get_student
 from app.configs import API_PREFIX
