@@ -3,7 +3,10 @@ from flask import Response, request
 from flask_restful import Resource
 from pydantic import ValidationError
 
-from app.api.university.api_models.course import CourseRequest, CourseResponse
+from app.api.university.api_models.course import (
+    CourseRequest,
+    CourseResponse,
+)
 from app.crud.university.course import (
     get_course,
     add_course,
@@ -20,11 +23,10 @@ class CoursesApi(Resource):
         This method returns all courses with their students
         ---
         parameters:
-          - name: with_students
+          - name: with
             in: query
-            type: boolean
-            default: true
-            description: Flag to include students in the response.
+            type: str
+            description: With which entity return response.
         responses:
           200:
             description: returns all courses or empty list
@@ -53,11 +55,8 @@ class CoursesApi(Resource):
                         ]
                 ]
         """
-        with_students = request.args.get(
-            "with_students", default=False, type=bool
-        )
-        exclude = {} if with_students else {"students"}
-
+        with_entity = request.args.get("with", None)
+        exclude = {} if with_entity == "students" else {"students"}
         courses = get_all_courses()
         return [
             CourseResponse.model_validate(course).model_dump(exclude=exclude)

@@ -1,3 +1,5 @@
+import typing as t
+
 from sqlalchemy import select
 
 from sqlalchemy.orm import (
@@ -12,7 +14,7 @@ from app.db.models import Student
 from app.db.session import s
 
 
-def get_all_students() -> list[Student]:
+def get_all_students() -> t.Sequence[Student]:
     """This function returns all students"""
     statement = select(Student).options(
         joinedload(Student.group), selectinload(Student.courses)
@@ -38,6 +40,7 @@ def add_student(student_data: StudentRequest) -> Student:
 
     if student_data.group_id:
         group = get_group(student_data.group_id)
+        assert group
         student.group_id = group.id
 
     s.user_db.add(student)

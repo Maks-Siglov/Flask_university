@@ -1,9 +1,8 @@
-import typing as t
-
-from app.api.university.api_models.base import MyBaseModel
-
-if t.TYPE_CHECKING:
-    from app.api.university.api_models.student import StudentResponse
+from app.api.university.api_models.base import (
+    MyBaseModel,
+    BaseStudent,
+    BaseCourse,
+)
 
 
 class CourseRequest(MyBaseModel):
@@ -12,8 +11,5 @@ class CourseRequest(MyBaseModel):
     student_ids: list[int] | None = None
 
 
-class CourseResponse(MyBaseModel):
-    id: int
-    name: str
-    description: str
-    students: t.Optional[list["StudentResponse"]] = None
+class CourseResponse(BaseCourse):
+    students: list[BaseStudent] | None = None

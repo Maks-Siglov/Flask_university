@@ -5,11 +5,11 @@ from app.configs import API_PREFIX
 from app.crud.university.group import get_group, get_group_by_name
 from app.init_routers import (
     GROUP_POST_ROUTE,
-    COURSES_ROUTE,
+    GROUPS_ROUTE,
 )
 
 GROUP_POST_ROUTE = f"{API_PREFIX}{GROUP_POST_ROUTE}"
-COURSES_ROUTE = f"{API_PREFIX}{COURSES_ROUTE}"
+GROUPS_ROUTE = f"{API_PREFIX}{GROUPS_ROUTE}"
 
 test_select_case = [5, 10, 15]
 
@@ -34,7 +34,7 @@ def test_404_group(client):
 
 
 def test_get_groups(client):
-    response = client.get(COURSES_ROUTE)
+    response = client.get(GROUPS_ROUTE)
     assert response.status_code == 200
     for item in json.loads(response.data):
         assert "name" in item
@@ -42,7 +42,7 @@ def test_get_groups(client):
 
 
 def test_get_groups_with_students(client):
-    response = client.get(COURSES_ROUTE, query_string={"with_students": True})
+    response = client.get(GROUPS_ROUTE, query_string={"with": "students"})
     assert response.status_code == 200
     for item in json.loads(response.data):
         assert "name" in item

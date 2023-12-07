@@ -22,7 +22,7 @@ def test_courses(client):
 
 
 def test_courses_with_students(client):
-    response = client.get(COURSES_ROUTE, query_string={"with_students": True})
+    response = client.get(COURSES_ROUTE, query_string={"with": "students"})
     assert response.status_code == 200
     for item in json.loads(response.data):
         assert "students" in item

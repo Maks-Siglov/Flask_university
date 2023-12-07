@@ -1,7 +1,4 @@
-from typing import (
-    Any,
-    TYPE_CHECKING,
-)
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import (
@@ -16,8 +13,8 @@ from app.db.models.student_course_association import (
 )
 
 if TYPE_CHECKING:
-    from .course import Course
-    from .group import Group
+    from app.db.models.course import Course
+    from app.db.models.group import Group
 
 
 class Student(Base):
@@ -36,24 +33,8 @@ class Student(Base):
     courses: Mapped[list["Course"]] = relationship(
         secondary=StudentCourseAssociationTable.__table__,
         back_populates="students",
+        join_depth=1,
     )
-
-    def to_dict(self, exclude: set[str] | None = None) -> dict[str, Any]:
-        if exclude is None:
-            exclude = set()
-        student_dict = {
-            "id": self.id,
-            "first_name": self.first_name,
-            "last_name": self.last_name,
-        }
-        if "group" not in exclude and self.group:
-            student_dict["group"] = self.group.to_dict(exclude={"students"})
-        if "course" not in exclude:
-            student_dict["courses"] = [
-                course.to_dict(exclude={"students"}) for course in self.courses
-            ]
-
-        return student_dict
 
     def __repr__(self) -> str:
         return (

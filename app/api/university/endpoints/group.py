@@ -30,7 +30,6 @@ class GroupStudentAmountApi(Resource):
           - name: student_amount
             in: path
             type: int
-
         responses:
           200:
             description: Returns groups with less or equal student amount
@@ -57,14 +56,16 @@ class GroupsApi(Resource):
         """
         This method returns all groups with their students
         ---
+        parameters:
+          - name: with
+            in: query
+            type: str
         responses:
           200:
             description: returns all groups or empty list if entity don't exist
         """
-        with_students = request.args.get(
-            "with_students", default=False, type=bool
-        )
-        exclude = {} if with_students else {"students"}
+        with_entity = request.args.get("with", None)
+        exclude = {} if with_entity == "students" else {"students"}
         groups = get_all_groups()
         return [
             GroupResponse.model_validate(group).model_dump(exclude=exclude)

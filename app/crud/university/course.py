@@ -1,3 +1,5 @@
+import typing as t
+
 from sqlalchemy import select
 
 from sqlalchemy.orm import (
@@ -12,7 +14,7 @@ from app.db.models import Course
 from app.db.session import s
 
 
-def get_all_courses() -> list[Course]:
+def get_all_courses() -> t.Sequence[Course]:
     """This function returns all courses"""
     statement = select(Course).options(selectinload(Course.students))
     return s.user_db.scalars(statement).all()
@@ -83,6 +85,7 @@ def overwrite_course(course: Course, request_data: CourseRequest) -> None:
     """This function entirely update the course"""
     course = set_value_to_model(course, request_data, exclude={"students_ids"})
     course.students.clear()
+    assert request_data.student_ids
     students = get_student_by_ids(request_data.student_ids)
     course.students.extend(students)
 

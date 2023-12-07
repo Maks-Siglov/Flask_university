@@ -3,7 +3,10 @@ from flask import Response, request
 from flask_restful import Resource
 from pydantic import ValidationError
 
-from app.api.university.api_models.student import StudentRequest, StudentResponse
+from app.api.university.api_models.student import (
+    StudentRequest,
+    StudentResponse
+)
 
 from app.crud.university.student import (
     get_all_students,
@@ -42,9 +45,11 @@ class StudentsApi(Resource):
                 },
             ]
         """
+        with_entity = request.args.get("with", None)
+        exclude = {} if with_entity == "courses" else {"courses"}
         students = get_all_students()
         return [
-            StudentResponse.model_validate(student).model_dump()
+            StudentResponse.model_validate(student).model_dump(exclude=exclude)
             for student in students
         ]
 
@@ -104,11 +109,11 @@ class StudentApi(Resource):
         """
         try:
             student_data = StudentRequest(**request.get_json())
-            student = add_student(student_data)
         except ValidationError as exc:
             return Response(f"Not valid data, {exc}", status=422)
 
-        return student.to_dict(exclude={"group, course"})
+        add_student(student_data)
+        return StudentResponse.model_validate(StudentRequest).model_dump()
 
     def patch(self, student_id: int, action: str | None = None):
         """

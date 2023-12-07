@@ -1,3 +1,5 @@
+import atexit
+
 from typing import Any
 
 from flasgger import Swagger
@@ -21,9 +23,9 @@ from app.db.session import (
 
 def create_app() -> Flask:
     logger_config()
+
     app = Flask(__name__)
     api = Api(app, prefix=API_PREFIX)
-    init_api_routers(api)
     Swagger(app)
 
     app.before_request(set_session)
@@ -33,13 +35,13 @@ def create_app() -> Flask:
         pop_session()
         return args
 
-    @app.teardown_appcontext
-    def close_db(args: Any) -> Any:
-        close_dbs()
-        return args
-
+    init_api_routers(api)
     return app
 
 
+app = create_app()
+
+
 if __name__ == "__main__":
-    create_app().run(host=APP_HOST, port=APP_PORT, debug=APP_DEBUG)
+    atexit.register(close_dbs)
+    app.run(host=APP_HOST, port=APP_PORT, debug=APP_DEBUG)

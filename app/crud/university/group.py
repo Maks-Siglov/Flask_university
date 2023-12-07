@@ -1,9 +1,10 @@
+import typing as t
+
 from sqlalchemy import (
     func,
     select,
-    Sequence,
 )
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import selectinload, joinedload
 
 from app.crud.university.utils import set_value_to_model, get_student_by_ids
 from app.api.university.api_models.group import GroupRequest
@@ -11,13 +12,13 @@ from app.db.models import Group
 from app.db.session import s
 
 
-def get_all_groups() -> list[Group]:
+def get_all_groups() -> t.Sequence[Group]:
     """This function returns all groups"""
-    statement = select(Group).options(joinedload(Group.students))
-    return s.user_db.scalars(statement).unique().all()
+    statement = select(Group).options(selectinload(Group.students))
+    return s.user_db.scalars(statement).all()
 
 
-def less_or_equal_students_in_group(students_amount: int) -> Sequence[Group]:
+def less_or_equal_students_in_group(students_amount: int) -> t.Sequence[Group]:
     """This query return groups which has less or equal amount of student then
     the specified argument"""
     statement = (
@@ -100,6 +101,7 @@ def overwrite_group(group: Group, request_data: GroupRequest) -> None:
     """This function overwrites group in the database"""
     group = set_value_to_model(group, request_data, exclude={"student_ids"})
     group.students.clear()
+    assert request_data.student_ids
     students = get_student_by_ids(request_data.student_ids)
     group.students.extend(students)
 
