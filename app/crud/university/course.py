@@ -43,7 +43,7 @@ def add_course(course_data: CourseRequest) -> Course:
 
 def update_course(
     course: Course, request_data: CourseRequest, action: str | None
-) -> None:
+) -> Course:
     """This function update course by provided data"""
     course = set_value_to_model(course, request_data, exclude={"students_ids"})
     if request_data.student_ids:
@@ -51,6 +51,8 @@ def update_course(
             _add_students_to_course(course, request_data.student_ids)
         if action == "remove":
             _remove_students_from_course(course, request_data.student_ids)
+
+    return course
 
 
 def _add_students_to_course(course: Course, student_ids: list[int]) -> None:
@@ -81,13 +83,15 @@ def _remove_students_from_course(
         course.students.remove(student)
 
 
-def overwrite_course(course: Course, request_data: CourseRequest) -> None:
+def put_course(course: Course, request_data: CourseRequest) -> Course:
     """This function entirely update the course"""
     course = set_value_to_model(course, request_data, exclude={"students_ids"})
     course.students.clear()
     assert request_data.student_ids
     students = get_student_by_ids(request_data.student_ids)
     course.students.extend(students)
+
+    return course
 
 
 def delete_course(course: Course) -> None:

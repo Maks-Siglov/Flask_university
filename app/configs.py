@@ -18,8 +18,8 @@ DB_HOST = os.getenv("DB_HOST")
 POSTGRESS_DB = os.getenv("POSTGRESS_DB")
 
 APP_HOST = os.getenv("APP_HOST")
-APP_PORT = os.getenv("APP_PORT")
-APP_DEBUG = os.getenv("APP_DEBUG", 0)
+APP_PORT = int(os.getenv("APP_PORT", "5000"))
+APP_DEBUG = bool(os.getenv("APP_DEBUG", 0))
 
 ENGINE = os.getenv("ENGINE")
 

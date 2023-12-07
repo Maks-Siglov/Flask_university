@@ -1,4 +1,4 @@
-from typing import Any
+import typing as t
 from flask import (
     Response,
     request,
@@ -17,12 +17,12 @@ from app.crud.university.group import (
     add_group,
     update_group,
     delete_group,
-    overwrite_group,
+    put_group,
 )
 
 
 class GroupStudentAmountApi(Resource):
-    def get(self, student_amount: int) -> list[dict[str, Any]] | Response:
+    def get(self, student_amount: int) -> list[dict[str, t.Any]] | Response:
         """
         This method retrieves a groups with less or equal student amount
         ---
@@ -33,12 +33,22 @@ class GroupStudentAmountApi(Resource):
         responses:
           200:
             description: Returns groups with less or equal student amount
-            examples: {
-                    'application/json': [
-                        {'id': 9, 'name': 'TT-23'},
-                        {'id': 3, 'name': 'CS-11'},
-                    ]
-                }
+            examples: [
+                    {
+                      "id": 9,
+                      "name": "XH-33",
+                      "students": []
+                    },
+                    {
+                      "id": 3,
+                      "name": "TN-56",
+                      "students": [
+                            "id": 15,
+                            "first_name": "Grace",
+                            "last_name": "White"
+                        ]
+                    },
+                ]
           404:
             description: There is no groups with specified amount
         """
@@ -52,7 +62,7 @@ class GroupStudentAmountApi(Resource):
 
 
 class GroupsApi(Resource):
-    def get(self) -> list[dict[str, Any]] | list:
+    def get(self) -> list[dict[str, t.Any]] | list:
         """
         This method returns all groups with their students
         ---
@@ -65,7 +75,7 @@ class GroupsApi(Resource):
             description: returns all groups or empty list if entity don't exist
         """
         with_entity = request.args.get("with", None)
-        exclude = {} if with_entity == "students" else {"students"}
+        exclude = set() if with_entity == "students" else {"students"}
         groups = get_all_groups()
         return [
             GroupResponse.model_validate(group).model_dump(exclude=exclude)
@@ -74,7 +84,7 @@ class GroupsApi(Resource):
 
 
 class GroupApi(Resource):
-    def get(self, group_id: int) -> Response | dict[str, Any]:
+    def get(self, group_id: int) -> Response | dict[str, t.Any]:
         """
         This method return data about group by it id
         ---
@@ -128,7 +138,9 @@ class GroupApi(Resource):
             GroupResponse.model_validate(group).model_dump_json(), 201
         )
 
-    def patch(self, group_id: int, action: str | None = None):
+    def patch(
+        self, group_id: int, action: str | None = None
+    ) -> dict[str, t.Any] | Response:
         """
         This method update group in the database by group_id
         ---
@@ -156,12 +168,10 @@ class GroupApi(Resource):
         except ValueError as exc:
             return Response(f"Not valid data, {exc}", status=422)
 
-        update_group(group, request_data, action)
-        return Response(
-            f"Group with id {group_id} updated successfully", status=200
-        )
+        updated_group = update_group(group, request_data, action)
+        return GroupResponse.model_validate(updated_group).model_dump()
 
-    def put(self, group_id: int):
+    def put(self, group_id: int) -> dict[str, t.Any] | Response:
         """
         This method update group in the database by group_id
         ---
@@ -187,10 +197,8 @@ class GroupApi(Resource):
         except ValueError as exc:
             return Response(f"Not valid data, {exc}", status=422)
 
-        overwrite_group(group, request_data)
-        return Response(
-            f"Group with id {group_id} updated successfully", status=200
-        )
+        putted_group = put_group(group, request_data)
+        return GroupResponse.model_validate(putted_group).model_dump()
 
     def delete(self, group_id: int):
         """

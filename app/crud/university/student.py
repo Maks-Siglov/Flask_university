@@ -51,7 +51,7 @@ def add_student(student_data: StudentRequest) -> Student:
 
 def update_student(
     student: Student, request_data: StudentRequest, action: str | None
-) -> None:
+) -> Student:
     """This function update student by provided data"""
     student = set_value_to_model(
         student, request_data, exclude={"group_id", "course_ids"}
@@ -63,12 +63,14 @@ def update_student(
     if request_data.course_ids:
         _update_student_courses(student, request_data.course_ids, action)
 
+    return student
+
 
 def _change_student_group(
     student: Student, group_id: int, action: str | None
 ) -> None:
     if action == "append":
-        if student.group:
+        if student.group is not None:
             raise ValueError(
                 f"Student {student.id} already assigned to {student.group}"
             )
@@ -101,17 +103,22 @@ def _update_student_courses(
             student.courses.remove(course)
 
 
-def overwrite_student(student: Student, request_data: StudentRequest):
+def put_student(student: Student, request_data: StudentRequest) -> Student:
     """This function entirely change the student in the database"""
     student = set_value_to_model(
         student, request_data, exclude={"group_id", "course_ids"}
     )
     student.courses.clear()
+    assert request_data.course_ids
     courses = get_course_by_ids(request_data.course_ids)
     student.courses.extend(courses)
 
+    assert request_data.group_id
     new_group = get_group(request_data.group_id)
+    assert new_group
     student.group = new_group
+
+    return student
 
 
 def delete_student(student: Student) -> None:

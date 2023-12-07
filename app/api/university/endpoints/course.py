@@ -1,4 +1,4 @@
-from typing import Any
+import typing as t
 from flask import Response, request
 from flask_restful import Resource
 from pydantic import ValidationError
@@ -13,12 +13,12 @@ from app.crud.university.course import (
     update_course,
     delete_course,
     get_all_courses,
-    overwrite_course,
+    put_course,
 )
 
 
 class CoursesApi(Resource):
-    def get(self) -> list[dict[str, Any]] | list:
+    def get(self) -> list[dict[str, t.Any]] | list:
         """
         This method returns all courses with their students
         ---
@@ -26,7 +26,6 @@ class CoursesApi(Resource):
           - name: with
             in: query
             type: str
-            description: With which entity return response.
         responses:
           200:
             description: returns all courses or empty list
@@ -56,7 +55,7 @@ class CoursesApi(Resource):
                 ]
         """
         with_entity = request.args.get("with", None)
-        exclude = {} if with_entity == "students" else {"students"}
+        exclude = set() if with_entity == "students" else {"students"}
         courses = get_all_courses()
         return [
             CourseResponse.model_validate(course).model_dump(exclude=exclude)
@@ -65,7 +64,7 @@ class CoursesApi(Resource):
 
 
 class CourseApi(Resource):
-    def get(self, course_id: int) -> Response | dict[str, Any]:
+    def get(self, course_id: int) -> Response | dict[str, t.Any]:
         """
         This method return data about course by it id
         ---
@@ -120,7 +119,9 @@ class CourseApi(Resource):
             CourseResponse.model_validate(course).model_dump_json(), 201
         )
 
-    def patch(self, course_id: int, action: str | None = None) -> Response:
+    def patch(
+        self, course_id: int, action: str | None = None
+    ) -> dict[str, t.Any] | Response:
         """
         This method update course in the database by course_id
         ---
@@ -128,7 +129,7 @@ class CourseApi(Resource):
           - name: course_id
             in: path
             type: int
-        - name: action
+          - name: action
             in: path
             type: str
         responses:
@@ -148,12 +149,10 @@ class CourseApi(Resource):
         except ValidationError as exc:
             return Response(f"Not valid data, {exc}", status=422)
 
-        update_course(course, request_data, action)
-        return Response(
-            f"Course with id {course_id} updated successfully", status=200
-        )
+        updated_course = update_course(course, request_data, action)
+        return CourseResponse.model_validate(updated_course).model_dump()
 
-    def put(self, course_id: int) -> Response:
+    def put(self, course_id: int) -> dict[str, t.Any] | Response:
         """
         This method update entire course in the database by course_id
         ---
@@ -161,7 +160,7 @@ class CourseApi(Resource):
           - name: course_id
             in: path
             type: int
-        - name: action
+          - name: action
             in: path
             type: str
         responses:
@@ -182,10 +181,8 @@ class CourseApi(Resource):
         except ValidationError as exc:
             return Response(f"Not valid data, {exc}", status=422)
 
-        overwrite_course(course, request_data)
-        return Response(
-            f"Course with id {course_id} updated successfully", status=200
-        )
+        putted_course = put_course(course, request_data)
+        return CourseResponse.model_validate(putted_course).model_dump()
 
     def delete(self, course_id: int):
         """

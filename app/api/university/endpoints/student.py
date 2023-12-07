@@ -1,11 +1,11 @@
-from typing import Any
+import typing as t
 from flask import Response, request
 from flask_restful import Resource
 from pydantic import ValidationError
 
 from app.api.university.api_models.student import (
     StudentRequest,
-    StudentResponse
+    StudentResponse,
 )
 
 from app.crud.university.student import (
@@ -14,15 +14,19 @@ from app.crud.university.student import (
     update_student,
     delete_student,
     get_student,
-    overwrite_student,
+    put_student,
 )
 
 
 class StudentsApi(Resource):
-    def get(self) -> list[dict[str, Any]] | Response:
+    def get(self) -> list[dict[str, t.Any]] | Response:
         """
         This method returns all students with their courses and groups
         ---
+        parameters:
+          - name: with
+            in: query
+            type: str
         responses:
           200:
             description: returns all students or empty list
@@ -46,7 +50,7 @@ class StudentsApi(Resource):
             ]
         """
         with_entity = request.args.get("with", None)
-        exclude = {} if with_entity == "courses" else {"courses"}
+        exclude = set() if with_entity == "courses" else {"courses"}
         students = get_all_students()
         return [
             StudentResponse.model_validate(student).model_dump(exclude=exclude)
@@ -55,7 +59,7 @@ class StudentsApi(Resource):
 
 
 class StudentApi(Resource):
-    def get(self, student_id: int) -> dict[str, Any] | Response:
+    def get(self, student_id: int) -> dict[str, t.Any] | Response:
         """
         This method return data about student by it id
         ---
@@ -90,7 +94,7 @@ class StudentApi(Resource):
             return Response(f"Student with id {student_id} don't exist", 404)
         return StudentResponse.model_validate(student).model_dump()
 
-    def post(self) -> dict[str, Any] | Response:
+    def post(self) -> dict[str, t.Any] | Response:
         """
         This method add a new student to the database
         ---
@@ -112,10 +116,12 @@ class StudentApi(Resource):
         except ValidationError as exc:
             return Response(f"Not valid data, {exc}", status=422)
 
-        add_student(student_data)
-        return StudentResponse.model_validate(StudentRequest).model_dump()
+        new_student = add_student(student_data)
+        return StudentResponse.model_validate(new_student).model_dump()
 
-    def patch(self, student_id: int, action: str | None = None):
+    def patch(
+        self, student_id: int, action: str | None = None
+    ) -> dict[str, t.Any] | Response:
         """
         This method update student in the database by student_id
         ---
@@ -143,12 +149,10 @@ class StudentApi(Resource):
         except ValidationError as exc:
             return Response(f"Not valid data, {exc}", status=422)
 
-        update_student(student, request_data, action)
-        return Response(
-            f"Student with id {student_id} updated successfully", status=200
-        )
+        updated_student = update_student(student, request_data, action)
+        return StudentResponse.model_validate(updated_student).model_dump()
 
-    def put(self, student_id: int):
+    def put(self, student_id: int) -> dict[str, t.Any] | Response:
         """
         This method update student in the database by student_id
         ---
@@ -174,10 +178,8 @@ class StudentApi(Resource):
         except ValidationError as exc:
             return Response(f"Not valid data, {exc}", status=422)
 
-        overwrite_student(student, request_data)
-        return Response(
-            f"Student with id {student_id} updated successfully", status=200
-        )
+        putted_student = put_student(student, request_data)
+        return StudentResponse.model_validate(putted_student).model_dump()
 
     def delete(self, student_id: int) -> Response:
         """
@@ -194,7 +196,7 @@ class StudentApi(Resource):
             description: Student don't exist
         """
         student = get_student(student_id)
-        if not get_student(student_id):
+        if not student:
             return Response(f"Student {student_id} don't exist", status=404)
 
         delete_student(student)

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import (
@@ -25,7 +25,7 @@ class Student(Base):
     first_name: Mapped[str] = mapped_column()
     last_name: Mapped[str] = mapped_column()
 
-    group_id: Mapped[int] = mapped_column(
+    group_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("groups.id", ondelete="SET NULL"), nullable=True
     )
     group: Mapped["Group"] = relationship(back_populates="students")

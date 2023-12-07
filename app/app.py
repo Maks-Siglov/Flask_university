@@ -1,6 +1,6 @@
 import atexit
 
-from typing import Any
+import typing as t
 
 from flasgger import Swagger
 from flask import Flask
@@ -31,7 +31,7 @@ def create_app() -> Flask:
     app.before_request(set_session)
 
     @app.teardown_request
-    def handle_session(args: Any) -> Any:
+    def handle_session(args: t.Any) -> t.Any:
         pop_session()
         return args
 

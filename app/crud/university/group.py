@@ -61,7 +61,7 @@ def add_group(group_data: GroupRequest) -> Group:
 
 def update_group(
     group: Group, request_data: GroupRequest, action: str | None
-) -> None:
+) -> Group:
     """This function updates group by provided data"""
     group = set_value_to_model(group, request_data, exclude={"student_ids"})
     if request_data.student_ids:
@@ -69,6 +69,8 @@ def update_group(
             _add_students_to_group(group, request_data.student_ids)
         if action == "remove":
             _remove_students_from_group(group, request_data.student_ids)
+
+    return group
 
 
 def _add_students_to_group(group: Group, student_ids: list[int]) -> None:
@@ -97,13 +99,15 @@ def _remove_students_from_group(group: Group, student_ids: list[int]) -> None:
         group.students.remove(student)
 
 
-def overwrite_group(group: Group, request_data: GroupRequest) -> None:
+def put_group(group: Group, request_data: GroupRequest) -> Group:
     """This function overwrites group in the database"""
     group = set_value_to_model(group, request_data, exclude={"student_ids"})
     group.students.clear()
     assert request_data.student_ids
     students = get_student_by_ids(request_data.student_ids)
     group.students.extend(students)
+
+    return group
 
 
 def delete_group(group: Group) -> None:
