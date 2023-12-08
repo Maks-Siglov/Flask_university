@@ -1,10 +1,11 @@
 import typing as t
+
 from pydantic import BaseModel
 from sqlalchemy import select
 
-from app.db.session import s
-from app.db.models.base import Base
 from app.db.models import Course, Student
+from app.db.models.base import Base
+from app.db.session import s
 
 M = t.TypeVar("M", bound=Base)
 T = t.TypeVar("T", bound=BaseModel)

@@ -1,11 +1,7 @@
 from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import (
-    Mapped,
-    mapped_column,
-    relationship,
-)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.models.base import Base
 from app.db.models.student_course_association import (

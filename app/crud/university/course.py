@@ -1,16 +1,14 @@
 import typing as t
 
 from sqlalchemy import select
-
-from sqlalchemy.orm import (
-    selectinload,
-    joinedload,
-)
+from sqlalchemy.orm import joinedload, selectinload
 
 from app.api.university.api_models.course import CourseRequest
-from app.crud.university.utils import set_value_to_model, get_student_by_ids
+from app.crud.university.utils import (
+    get_student_by_ids,
+    set_value_to_model,
+)
 from app.db.models import Course
-
 from app.db.session import s
 
 

@@ -1,16 +1,18 @@
 from flask_restful import Api
 
-from app.api.university.endpoints.student import StudentsApi, StudentApi
+from app.api.university.endpoints.course import (
+    CourseApi,
+    CoursesApi,
+)
 from app.api.university.endpoints.group import (
-    GroupStudentAmountApi,
     GroupApi,
     GroupsApi,
+    GroupStudentAmountApi,
 )
-from app.api.university.endpoints.course import (
-    CoursesApi,
-    CourseApi,
+from app.api.university.endpoints.student import (
+    StudentApi,
+    StudentsApi,
 )
-
 
 GROUP_STUDENTS_AMOUNT_ROUTE = "/group_students_amount/<int:student_amount>"
 GROUPS_ROUTE = "/groups"

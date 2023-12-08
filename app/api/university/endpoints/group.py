@@ -1,8 +1,6 @@
 import typing as t
-from flask import (
-    Response,
-    request,
-)
+
+from flask import Response, request
 from flask_restful import Resource
 from pydantic import ValidationError
 
@@ -11,13 +9,13 @@ from app.api.university.api_models.group import (
     GroupResponse,
 )
 from app.crud.university.group import (
-    less_or_equal_students_in_group,
+    add_group,
+    delete_group,
     get_all_groups,
     get_group,
-    add_group,
-    update_group,
-    delete_group,
+    less_or_equal_students_in_group,
     put_group,
+    update_group,
 )
 
 

@@ -1,12 +1,16 @@
-import pytest
 import json
 
+import pytest
+
 from app.configs import API_PREFIX
-from app.init_routers import (
-    COURSES_ROUTE,
-    COURSE_POST_ROUTE,
+from app.crud.university.course import (
+    get_course,
+    get_course_by_name,
 )
-from app.crud.university.course import get_course, get_course_by_name
+from app.init_routers import (
+    COURSE_POST_ROUTE,
+    COURSES_ROUTE,
+)
 
 COURSES_ROUTE = f"{API_PREFIX}{COURSES_ROUTE}"
 COURSE_POST_ROUTE = f"{API_PREFIX}{COURSE_POST_ROUTE}"

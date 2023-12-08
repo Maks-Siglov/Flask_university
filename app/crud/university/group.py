@@ -1,13 +1,13 @@
 import typing as t
 
-from sqlalchemy import (
-    func,
-    select,
-)
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy import func, select
+from sqlalchemy.orm import joinedload, selectinload
 
-from app.crud.university.utils import set_value_to_model, get_student_by_ids
 from app.api.university.api_models.group import GroupRequest
+from app.crud.university.utils import (
+    get_student_by_ids,
+    set_value_to_model,
+)
 from app.db.models import Group
 from app.db.session import s
 

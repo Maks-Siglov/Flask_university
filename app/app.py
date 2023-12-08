@@ -1,13 +1,10 @@
 import atexit
-
 import typing as t
 
 from flasgger import Swagger
 from flask import Flask
 from flask_restful import Api
 
-from app.logger import logger_config
-from app.init_routers import init_api_routers
 from app.configs import (
     API_PREFIX,
     APP_DEBUG,
@@ -19,6 +16,8 @@ from app.db.session import (
     pop_session,
     set_session,
 )
+from app.init_routers import init_api_routers
+from app.logger import logger_config
 
 
 def create_app() -> Flask:

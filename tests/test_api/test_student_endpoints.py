@@ -1,8 +1,9 @@
-import pytest
 import json
 
-from app.crud.university.student import get_student
+import pytest
+
 from app.configs import API_PREFIX
+from app.crud.university.student import get_student
 from app.init_routers import (
     STUDENT_POST_ROUTE,
     STUDENTS_ROUTE,

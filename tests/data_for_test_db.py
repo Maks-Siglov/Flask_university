@@ -1,9 +1,5 @@
+from app.db.models import Course, Group, Student
 from app.db.session import s
-from app.db.models import (
-    Student,
-    Course,
-    Group,
-)
 
 COURSE_ONE = {"name": "course_one_student", "description": "Description 1"}
 COURSE_TWO = {"name": "course_two_student", "description": "Description 2"}

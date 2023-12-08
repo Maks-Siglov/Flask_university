@@ -1,7 +1,7 @@
 from app.api.university.api_models.base import (
-    MyBaseModel,
-    BaseStudent,
     BaseCourse,
+    BaseStudent,
+    MyBaseModel,
 )
 
 

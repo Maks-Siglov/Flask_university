@@ -1,9 +1,6 @@
 import logging
 
-from sqlalchemy import (
-    create_engine,
-    text,
-)
+from sqlalchemy import create_engine, text
 from sqlalchemy.exc import ProgrammingError
 
 from app.db.models.base import Base
@@ -28,7 +25,7 @@ def drop_database(db_url: str, db_name: str) -> None:
         with create_engine(
             db_url, isolation_level="AUTOCOMMIT"
         ).begin() as connect:
-            connect.execute(text(f"DROP DATABASE {db_name} WITH(FORCE)"))
+            connect.execute(text(f"DROP DATABASE {db_name} WITH(FORCE);"))
             log.info(f"Database {db_name} dropped")
     except ProgrammingError:
         log.info(f"Database {db_name} don't exist")

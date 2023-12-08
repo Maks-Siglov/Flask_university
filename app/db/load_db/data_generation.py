@@ -7,11 +7,7 @@ from app.db.load_db.data_for_generation import (
     STUDENT_FIRS_NAMES,
     STUDENT_LAST_NAMES,
 )
-from app.db.models import (
-    Course,
-    Group,
-    Student,
-)
+from app.db.models import Course, Group, Student
 from app.db.session import s
 
 

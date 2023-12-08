@@ -1,4 +1,5 @@
 import typing as t
+
 from flask import Response, request
 from flask_restful import Resource
 from pydantic import ValidationError
@@ -8,12 +9,12 @@ from app.api.university.api_models.course import (
     CourseResponse,
 )
 from app.crud.university.course import (
-    get_course,
     add_course,
-    update_course,
     delete_course,
     get_all_courses,
+    get_course,
     put_course,
+    update_course,
 )
 
 

@@ -1,8 +1,12 @@
-import pytest
 import json
 
+import pytest
+
 from app.configs import API_PREFIX
-from app.crud.university.group import get_group, get_group_by_name
+from app.crud.university.group import (
+    get_group,
+    get_group_by_name,
+)
 from app.init_routers import (
     GROUP_POST_ROUTE,
     GROUPS_ROUTE,
