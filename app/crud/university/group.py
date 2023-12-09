@@ -8,7 +8,7 @@ from app.crud.university.utils import (
     get_student_by_ids,
     set_value_to_model,
 )
-from app.db.models import Group
+from app.db.models import Group, Student
 from app.db.session import s
 
 
@@ -46,11 +46,7 @@ def add_group(group_data: GroupRequest) -> Group:
 
     if group_data.student_ids:
         students = get_student_by_ids(group_data.student_ids)
-        for student in students:
-            if student.group:
-                raise ValueError(
-                    f"Student {student.id} already belong to {student.group}"
-                )
+        _validate_student_group(students, group)
         group.students.extend(students)
 
     s.user_db.add(group)
@@ -78,11 +74,7 @@ def _add_students_to_group(group: Group, student_ids: list[int]) -> None:
     persist in group ValueError raised, after check we add students to group
     """
     new_students = get_student_by_ids(student_ids)
-    for student in new_students:
-        if student.group:
-            raise ValueError(
-                f"Student {student.id} already belong to {group.name}"
-            )
+    _validate_student_group(new_students, group)
     group.students.extend(new_students)
 
 
@@ -105,6 +97,7 @@ def put_group(group: Group, request_data: GroupRequest) -> Group:
     group.students.clear()
     assert request_data.student_ids
     students = get_student_by_ids(request_data.student_ids)
+    _validate_student_group(students, group)
     group.students.extend(students)
 
     return group
@@ -113,3 +106,15 @@ def put_group(group: Group, request_data: GroupRequest) -> Group:
 def delete_group(group: Group) -> None:
     """This function delete group from database"""
     s.user_db.delete(group)
+
+
+def _validate_student_group(
+        students: t.Sequence[Student], group: Group
+) -> None:
+    """This function check whether students assigned to group, if yes
+     ValueError raised"""
+    for student in students:
+        if student.group:
+            raise ValueError(
+                f"Student {student.id} already belong to {group.name}"
+            )

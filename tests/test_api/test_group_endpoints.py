@@ -25,16 +25,6 @@ def test_less_or_equal_students_in_group(client, student_amount):
         assert "name" in item
 
 
-ZERO_STUDENTS_AMOUNT = 0
-
-
-def test_404_group(client):
-    response = client.get(
-        f"{API_PREFIX}/group_students_amount/{ZERO_STUDENTS_AMOUNT}"
-    )
-    assert response.status_code == 404
-
-
 def test_get_groups(client):
     response = client.get(GROUPS_ROUTE)
     assert response.status_code == 200
@@ -150,6 +140,13 @@ def test_delete_group(client):
     response = client.delete(f"{API_PREFIX}/group/{DELETE_GROUP_ID}")
     assert response.status_code == 204
     assert response.data == b""
+
+
+def test_zero_amount_group(client):
+    response = client.get(
+        f"{API_PREFIX}/group_students_amount/0"
+    )
+    assert response.status_code == 404
 
 
 test_404_method_case = ["get", "patch", "put", "delete"]

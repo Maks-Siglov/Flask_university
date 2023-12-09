@@ -73,7 +73,9 @@ def _change_student_group(
             raise ValueError(
                 f"Student {student.id} already assigned to {student.group}"
             )
-        student.group = get_group(group_id)
+        group = get_group(group_id)
+        assert group
+        student.group = group
 
     if action == "remove":
         if not student.group_id == group_id:
