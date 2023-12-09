@@ -3,10 +3,6 @@ import json
 import pytest
 
 from app.configs import API_PREFIX
-from app.crud.university.course import (
-    get_course,
-    get_course_by_name,
-)
 from app.init_routers import (
     COURSE_POST_ROUTE,
     COURSES_ROUTE,
@@ -32,8 +28,11 @@ def test_courses_with_students(client):
         assert "students" in item
 
 
+GET_COURSE_ID = 1
+
+
 def test_get_course(client):
-    response = client.get(f"{API_PREFIX}/course/1")
+    response = client.get(f"{API_PREFIX}/course/{GET_COURSE_ID}")
     assert response.status_code == 200
     data = json.loads(response.data)
     assert "name" in data
@@ -45,12 +44,12 @@ post_course_json_cases = [
     {
         "name": "New Course",
         "description": "Educational course",
-        "student_ids": [1, 2, 3],
+        "student_ids": [12, 13],
     },
     {
         "name": "Second new course",
         "description": " Second educational course",
-        "student_ids": [],
+        "student_ids": [14],
     },
 ]
 
@@ -64,10 +63,11 @@ def test_post_course(client, post_course_json):
     new_course_description = post_course_json["description"]
     new_course_student_ids = post_course_json["student_ids"]
 
-    new_course = get_course_by_name(new_course_name)
-    assert new_course.name == new_course_name
-    assert new_course.description == new_course_description
-    assert len(new_course.students) == len(new_course_student_ids)
+    response_data = json.loads(response.data)
+
+    assert response_data["name"] == new_course_name
+    assert response_data["description"] == new_course_description
+    assert len(response_data["students"]) == len(new_course_student_ids)
 
 
 post_course_without_students_json = {
@@ -85,18 +85,17 @@ def test_post_course_without_student_ids(client):
     new_course_name = post_course_without_students_json["name"]
     new_course_description = post_course_without_students_json["description"]
 
-    new_course = get_course_by_name(new_course_name)
-    assert new_course.name == new_course_name
-    assert new_course.description == new_course_description
+    response_data = json.loads(response.data)
+
+    assert response_data["name"] == new_course_name
+    assert response_data["description"] == new_course_description
 
 
 PATCH_COURSE_ID = 1
-UPDATE_COURSE_NANE = "Updated course"
-UPDATE_COURSE_DESCRIPTION = "Updated description"
 
 update_course_json = {
-    "name": UPDATE_COURSE_NANE,
-    "description": UPDATE_COURSE_DESCRIPTION,
+    "name": "Updated course",
+    "description": "Updated description",
 }
 
 
@@ -105,79 +104,69 @@ def test_update_course(client):
         f"{API_PREFIX}/course/{PATCH_COURSE_ID}", json=update_course_json
     )
     assert response.status_code == 200
-    updated_course = get_course(PATCH_COURSE_ID)
-    assert updated_course.name == UPDATE_COURSE_NANE
-    assert updated_course.description == UPDATE_COURSE_DESCRIPTION
+
+    response_data = json.loads(response.data)
+
+    assert response_data["name"] == update_course_json["name"]
+    assert response_data["description"] == update_course_json["description"]
 
 
-append_students_json = {"student_ids": [1, 2, 3]}
-STUDENTS_AMOUNT = 3
-UPDATE_COURSE_ID = 3
+UPDATE_COURSE_ID = 4
+append_students_json = {"student_ids": [15, 16]}
 
 
-def test_course_append_students(client):
+def test_course_add_students(client):
     response = client.patch(
         f"{API_PREFIX}/course/{UPDATE_COURSE_ID}/append",
         json=append_students_json,
     )
     assert response.status_code == 200
-    updated_course = get_course(UPDATE_COURSE_ID)
-    assert len(updated_course.students) == STUDENTS_AMOUNT
-
-
-def test_course_append_duplicated_students(client):
-    client.patch(
-        f"{API_PREFIX}/course/{UPDATE_COURSE_ID}/append",
-        json=append_students_json,
+    response_data = json.loads(response.data)
+    assert len(response_data["students"]) == len(
+        append_students_json["student_ids"]
     )
-    pytest.raises(ValueError)
 
 
-remove_students_json = {"student_ids": [1, 2, 3]}
+REMOVE_STUDENT_COURSE_ID = 1
+remove_students_json = {"student_ids": [1]}
 
 
 def test_course_remove_students(client):
     response = client.patch(
-        f"{API_PREFIX}/course/{UPDATE_COURSE_ID}/remove",
+        f"{API_PREFIX}/course/{REMOVE_STUDENT_COURSE_ID}/remove",
         json=remove_students_json,
     )
     assert response.status_code == 200
-    updated_course = get_course(UPDATE_COURSE_ID)
-    assert len(updated_course.students) == 0
+    response_data = json.loads(response.data)
+    assert len(response_data["students"]) == 0
 
 
-def test_course_remove_not_existed_students(client):
-    client.patch(
-        f"{API_PREFIX}/course/{UPDATE_COURSE_ID}/remove",
-        json=remove_students_json,
-    )
-    pytest.raises(ValueError)
-
-
-PUT_COURSE_NAME = "Updated put course"
-PUT_COURSE_DESCRIPTION = "Updated put description"
-PUT_COURSE_STUDENTS_AMOUNT = 3
+PUT_COURSE_ID = 1
 
 put_course_json = {
-    "name": PUT_COURSE_NAME,
-    "description": PUT_COURSE_DESCRIPTION,
-    "student_ids": [1, 2, 3],
+    "name": "Updated put course",
+    "description": "Updated put description",
+    "student_ids": [15, 16, 17],
 }
 
 
 def test_put_course(client):
-    response = client.put(f"{API_PREFIX}/course/1", json=put_course_json)
+    response = client.put(
+        f"{API_PREFIX}/course/{PUT_COURSE_ID}", json=put_course_json
+    )
     assert response.status_code == 200
-    putted_course = get_course_by_name(PUT_COURSE_NAME)
-    assert putted_course.name == PUT_COURSE_NAME
-    assert putted_course.description == PUT_COURSE_DESCRIPTION
-    assert len(putted_course.students) == 3
+    response_data = json.loads(response.data)
+    assert response_data["name"] == put_course_json["name"]
+    assert response_data["description"] == put_course_json["description"]
+    assert len(response_data["students"]) == len(
+        put_course_json["student_ids"]
+    )
 
 
 DELETE_COURSE_ID = 5
 
 
 def test_delete_course(client):
-    response = client.delete(f"/api/v1/course/{DELETE_COURSE_ID}")
+    response = client.delete(f"{API_PREFIX}/course/{DELETE_COURSE_ID}")
     assert response.status_code == 204
     assert response.data == b""

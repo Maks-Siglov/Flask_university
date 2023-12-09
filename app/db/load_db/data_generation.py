@@ -16,7 +16,7 @@ def load_db() -> None:
     assign to each student random amount of courses (from 1 to 3) then it
     fills groups by students and add to the database
     """
-    students = _create_students()
+    students = create_students(STUDENTS_AMOUNT)
     courses = _create_course()
 
     for student in students:
@@ -24,7 +24,7 @@ def load_db() -> None:
 
     assigned_students = []
 
-    for group in _create_groups():
+    for group in create_groups(GROUPS_AMOUNT):
         student_amount = random.randint(10, 30)
         if not len(students) > student_amount:
             student_amount = len(students)
@@ -37,7 +37,7 @@ def load_db() -> None:
     s.user_db.add_all(assigned_students)
 
 
-def _create_students() -> list[Student]:
+def create_students(students_amount: int) -> list[Student]:
     """This function generate list with Student instances, equal to
     STUDENTS_AMOUNT"""
     return [
@@ -45,7 +45,7 @@ def _create_students() -> list[Student]:
             first_name=random.choice(STUDENT_FIRS_NAMES),
             last_name=random.choice(STUDENT_LAST_NAMES),
         )
-        for _ in range(STUDENTS_AMOUNT)
+        for _ in range(students_amount)
     ]
 
 
@@ -56,16 +56,19 @@ def _create_course() -> list[Course]:
     ]
 
 
-def _create_groups() -> list[Group]:
+def create_groups(groups_amount: int) -> list[Group]:
     """This function generate list with Group instances"""
-    return [Group(name=group_name) for group_name in _generate_group_names()]
+    return [
+        Group(name=group_name) for group_name
+        in _generate_group_names(groups_amount)
+    ]
 
 
-def _generate_group_names() -> set[str]:
+def _generate_group_names(groups_amount: int) -> set[str]:
     """This function creates random groups name, while cycle and set guarantee
     that group name will be unique and equal to GROUPS_AMOUNT"""
     groups_name: set = set()
-    while len(groups_name) < GROUPS_AMOUNT:
+    while len(groups_name) < groups_amount:
         groups_name.add(
             f'{"".join(random.choices(string.ascii_uppercase, k=2))}-'
             f'{"".join(random.choices(string.digits, k=2))}'

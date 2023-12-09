@@ -2,7 +2,8 @@ import pytest
 
 from app.app import create_app
 from app.configs import (
-    BASE_URL, DB_NAME,
+    BASE_URL,
+    DB_NAME,
     POSTGRESS_DB,
 )
 from app.db.session import (
