@@ -40,19 +40,13 @@ class CoursesApi(Resource):
                                 'id': 2,
                                 'first_name': 'Jacob',
                                 'last_name': 'Martin'
-                            }
+                            },
                         ]
                     },
                     'id': 2,
                     'name': 'Physics',
                     "description": "Principles of matter and energy.",
-                    students: [
-                            {
-                                'id': 5,
-                                'first_name': 'Frank',
-                                'last_name': 'Garcia'
-                            }
-                        ]
+                    students: []
                 ]
         """
         with_entity = request.args.get("with", None)

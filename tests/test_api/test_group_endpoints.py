@@ -84,7 +84,7 @@ def test_post_group(client, json_data):
 
     response_data = json.loads(response.data)
     assert response_data["name"] == new_group_name
-    assert len(new_group_student_ids) == len(new_group_student_ids)
+    assert len(response_data["students"]) == len(new_group_student_ids)
 
 
 UPDATE_GROUP_ID = 1
@@ -150,3 +150,33 @@ def test_delete_group(client):
     response = client.delete(f"{API_PREFIX}/group/{DELETE_GROUP_ID}")
     assert response.status_code == 204
     assert response.data == b""
+
+
+test_404_method_case = ["get", "patch", "put", "delete"]
+
+
+@pytest.mark.parametrize("method", test_404_method_case)
+def test_404_group(client, method):
+    response = getattr(client, method)(f"{API_PREFIX}/group/1000")
+    assert response.status_code == 404
+
+
+invalid_data_json = {
+    "name": 1243
+}
+
+
+test_invalid_data_method_case = ["patch", "put"]
+
+
+@pytest.mark.parametrize("method", test_invalid_data_method_case)
+def test_invalid_data_group(client, method):
+    response = getattr(client, method)(
+        f"{API_PREFIX}/group/1", json=invalid_data_json
+    )
+    assert response.status_code == 422
+
+
+def test_invalid_post_group(client):
+    response = client.post(GROUP_POST_ROUTE, json=invalid_data_json)
+    assert response.status_code == 422

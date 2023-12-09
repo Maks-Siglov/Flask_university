@@ -142,7 +142,6 @@ def test_put_student(client):
     assert response_data["first_name"] == PUT_STUDENT_NAME
     assert response_data["last_name"] == PUT_STUDENT_LAST_NAME
     assert response_data["group"]["id"] == PUT_STUDENT_GROUP_ID
-    assert len(response_data["courses"]) == 2
     course_ids = put_student_json["course_ids"]
     assert len(response_data["courses"]) == len(course_ids)
 
@@ -154,3 +153,34 @@ def test_remove_student(client):
     response = client.delete(f"{API_PREFIX}/student/{DELETE_STUDENT_ID}")
     assert response.status_code == 204
     assert response.data == b""
+
+
+test_404_method_case = ["get", "patch", "put", "delete"]
+
+
+@pytest.mark.parametrize("method", test_404_method_case)
+def test_404_student(client, method):
+    response = getattr(client, method)(f"{API_PREFIX}/student/1000")
+    assert response.status_code == 404
+
+
+invalid_data_json = {
+    "first_name": 1243,
+    "last_name": [],
+}
+
+
+test_invalid_data_method_case = ["patch", "put"]
+
+
+@pytest.mark.parametrize("method", test_invalid_data_method_case)
+def test_invalid_data_student(client, method):
+    response = getattr(client, method)(
+        f"{API_PREFIX}/student/1", json=invalid_data_json
+    )
+    assert response.status_code == 422
+
+
+def test_invalid_data_post_student(client):
+    response = client.post(STUDENT_POST_ROUTE, json=invalid_data_json)
+    assert response.status_code == 422

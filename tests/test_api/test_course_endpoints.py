@@ -12,7 +12,7 @@ COURSES_ROUTE = f"{API_PREFIX}{COURSES_ROUTE}"
 COURSE_POST_ROUTE = f"{API_PREFIX}{COURSE_POST_ROUTE}"
 
 
-def test_courses(client):
+def test_get_courses(client):
     response = client.get(COURSES_ROUTE)
     assert response.status_code == 200
     for item in json.loads(response.data):
@@ -115,7 +115,7 @@ UPDATE_COURSE_ID = 4
 append_students_json = {"student_ids": [15, 16]}
 
 
-def test_course_add_students(client):
+def test_patch_course_add_students(client):
     response = client.patch(
         f"{API_PREFIX}/course/{UPDATE_COURSE_ID}/append",
         json=append_students_json,
@@ -131,7 +131,7 @@ REMOVE_STUDENT_COURSE_ID = 1
 remove_students_json = {"student_ids": [1]}
 
 
-def test_course_remove_students(client):
+def test_patch_course_remove_students(client):
     response = client.patch(
         f"{API_PREFIX}/course/{REMOVE_STUDENT_COURSE_ID}/remove",
         json=remove_students_json,
@@ -170,3 +170,33 @@ def test_delete_course(client):
     response = client.delete(f"{API_PREFIX}/course/{DELETE_COURSE_ID}")
     assert response.status_code == 204
     assert response.data == b""
+
+
+test_404_method_case = ["get", "patch", "put", "delete"]
+
+
+@pytest.mark.parametrize("method", test_404_method_case)
+def test_404_course(client, method):
+    response = getattr(client, method)(f"{API_PREFIX}/course/1000")
+    assert response.status_code == 404
+
+
+invalid_data_json = {
+    "name": 1243,
+    "description": [],
+}
+
+test_invalid_data_method_case = ["patch", "put"]
+
+
+@pytest.mark.parametrize("method", test_invalid_data_method_case)
+def test_invalid_data_course(client, method):
+    response = getattr(client, method)(
+        f"{API_PREFIX}/course/1", json=invalid_data_json
+    )
+    assert response.status_code == 422
+
+
+def test_invalid_post_course(client):
+    response = client.post(COURSE_POST_ROUTE, json=invalid_data_json)
+    assert response.status_code == 422
