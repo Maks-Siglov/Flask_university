@@ -109,10 +109,10 @@ def delete_group(group: Group) -> None:
 
 
 def _validate_student_group(
-        students: t.Sequence[Student], group: Group
+    students: t.Sequence[Student], group: Group
 ) -> None:
     """This function check whether students assigned to group, if yes
-     ValueError raised"""
+    ValueError raised"""
     for student in students:
         if student.group:
             raise ValueError(

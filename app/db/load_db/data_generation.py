@@ -59,8 +59,8 @@ def _create_course() -> list[Course]:
 def create_groups(groups_amount: int) -> list[Group]:
     """This function generate list with Group instances"""
     return [
-        Group(name=group_name) for group_name
-        in _generate_group_names(groups_amount)
+        Group(name=group_name)
+        for group_name in _generate_group_names(groups_amount)
     ]
 
 

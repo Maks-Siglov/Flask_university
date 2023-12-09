@@ -28,7 +28,7 @@ def get_course_by_ids(course_ids: list[int]) -> t.Sequence[Course]:
     statement = select(Course).where(Course.id.in_(course_ids))
     courses = s.user_db.scalars(statement).all()
     if len(courses) != len(course_ids):
-        raise ValueError('There is no courses with this ids')
+        raise ValueError("There is no courses with this ids")
     return courses
 
 
@@ -37,5 +37,5 @@ def get_student_by_ids(student_ids: list[int]) -> t.Sequence[Student]:
     statement = select(Student).where(Student.id.in_(student_ids))
     students = s.user_db.scalars(statement).all()
     if len(students) != len(student_ids):
-        raise ValueError('There is no students with this ids')
+        raise ValueError("There is no students with this ids")
     return students

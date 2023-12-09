@@ -1,6 +1,6 @@
 from app.db.models import Course, Group, Student
 from app.db.load_db.data_generation import create_students, create_groups
-from app.db.session import s, pop_session
+from app.db.session import s
 
 COURSE_ONE = {"name": "Course 1", "description": "Description 1"}
 COURSE_TWO = {"name": "Course 2", "description": "Description 2"}
