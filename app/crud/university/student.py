@@ -9,7 +9,7 @@ from app.crud.university.utils import (
     get_course_by_ids,
     set_value_to_model,
 )
-from app.db.models import Student, Course
+from app.db.models import Student, Course, Group
 from app.db.session import s
 
 
@@ -33,16 +33,16 @@ def post_student(student_data: StudentRequest) -> Student:
     student = Student(
         **student_data.model_dump(exclude={"course_ids", "group_id"})
     )
+    s.user_db.add(student)
     if student_data.course_ids:
         courses = get_course_by_ids(student_data.course_ids)
         student.courses.extend(courses)
 
     if student_data.group_id:
         group = get_group(student_data.group_id)
-        assert group
-        student.group_id = group.id
+        _validate_group(group, student_data.group_id)
+        student.group = group
 
-    s.user_db.add(student)
     s.user_db.commit()
     s.user_db.refresh(student)
     return student
@@ -87,8 +87,7 @@ def _add_student_to_group(student: Student, group_id: int) -> None:
             f"Student {student.id} already assigned to {student.group}"
         )
     group = get_group(group_id)
-    if not group:
-        raise ValueError(f"Group {group_id} don't exist")
+    _validate_group(group, group_id)
 
     student.group = group
 
@@ -123,10 +122,9 @@ def put_student(student: Student, request_data: StudentRequest) -> Student:
     student.courses.extend(courses)
 
     assert request_data.group_id
-    new_group = get_group(request_data.group_id)
-    if not new_group:
-        raise ValueError(f"Group {request_data.group_id} don't exist")
-    student.group = new_group
+    group = get_group(request_data.group_id)
+    _validate_group(group, request_data.group_id)
+    student.group = group
 
     return student
 
@@ -134,3 +132,8 @@ def put_student(student: Student, request_data: StudentRequest) -> Student:
 def delete_student(student: Student) -> None:
     """This function delete student from database"""
     s.user_db.delete(student)
+
+
+def _validate_group(group: Group, group_id: int) -> None:
+    if not group:
+        raise ValueError(f"Group {group_id} don't exist")
