@@ -68,9 +68,9 @@ UPDATE_WITH_ADD_STUDENT_ID = 5
 json_data_with_add = {"group_id": 4, "course_ids": [1, 2]}
 
 
-def test_update_student_with_append(client):
+def test_update_student_with_add(client):
     response = client.patch(
-        f"api/v1/student/{UPDATE_WITH_ADD_STUDENT_ID}/append",
+        f"api/v1/student/{UPDATE_WITH_ADD_STUDENT_ID}",
         json=json_data_with_add,
     )
     assert response.status_code == 200

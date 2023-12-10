@@ -112,18 +112,18 @@ def test_update_course(client):
 
 
 UPDATE_COURSE_ID = 4
-append_students_json = {"student_ids": [15, 16]}
+add_students_json = {"student_ids": [15, 16]}
 
 
 def test_patch_course_add_students(client):
     response = client.patch(
-        f"{API_PREFIX}/course/{UPDATE_COURSE_ID}/append",
-        json=append_students_json,
+        f"{API_PREFIX}/course/{UPDATE_COURSE_ID}",
+        json=add_students_json,
     )
     assert response.status_code == 200
     response_data = json.loads(response.data)
     assert len(response_data["students"]) == len(
-        append_students_json["student_ids"]
+        add_students_json["student_ids"]
     )
 
 

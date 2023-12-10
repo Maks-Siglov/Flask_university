@@ -9,7 +9,7 @@ from app.api.university.api_models.student import (
     StudentResponse,
 )
 from app.crud.university.student import (
-    add_student,
+    post_student,
     delete_student,
     get_all_students,
     get_student,
@@ -116,7 +116,7 @@ class StudentApi(Resource):
         except ValidationError as exc:
             return Response(f"Not valid data, {exc}", status=422)
 
-        new_student = add_student(student_data)
+        new_student = post_student(student_data)
         return StudentResponse.model_validate(new_student).model_dump()
 
     def patch(

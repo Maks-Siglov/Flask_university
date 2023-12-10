@@ -35,11 +35,6 @@ def get_group(group_id: int) -> Group | None:
     return s.user_db.get(Group, group_id, options=[joinedload(Group.students)])
 
 
-def get_group_by_name(group_name: str) -> Group | None:
-    statement = select(Group).where(Group.name == group_name)
-    return s.user_db.scalar(statement)
-
-
 def add_group(group_data: GroupRequest) -> Group:
     """This function create group and insert it to the database"""
     group = Group(**group_data.model_dump(exclude={"student_ids"}))
@@ -60,30 +55,35 @@ def update_group(
 ) -> Group:
     """This function updates group by provided data"""
     group = set_value_to_model(group, request_data, exclude={"student_ids"})
+
     if request_data.student_ids:
-        if action == "append":
-            _add_students_to_group(group, request_data.student_ids)
+        students = get_student_by_ids(request_data.student_ids)
         if action == "remove":
-            _remove_students_from_group(group, request_data.student_ids)
+            _remove_students_from_group(group, students)
+            return group
+
+        _add_students_to_group(group, students)
 
     return group
 
 
-def _add_students_to_group(group: Group, student_ids: list[int]) -> None:
-    """This function selects students by provided ids, if student already
-    persist in group ValueError raised, after check we add students to group
+def _add_students_to_group(
+        group: Group, students: t.Sequence[Student]
+) -> None:
+    """This function call validation function, if student already persist in
+    group ValueError raised, after check we add students to group
     """
-    new_students = get_student_by_ids(student_ids)
-    _validate_student_group(new_students, group)
-    group.students.extend(new_students)
+    _validate_student_group(students, group)
+    group.students.extend(students)
 
 
-def _remove_students_from_group(group: Group, student_ids: list[int]) -> None:
-    """This function selects students by provided ids, if student don't persist
-    in group ValueError raised, after check we remove student from group
+def _remove_students_from_group(
+        group: Group, students: t.Sequence[Student]
+) -> None:
+    """This function check whether student don't persist in group, if yes
+    ValueError raised, after check we remove student from group
     """
-    removed_students = get_student_by_ids(student_ids)
-    for student in removed_students:
+    for student in students:
         if student not in group.students:
             raise ValueError(
                 f"Student {student.id} don't persist in {group.name}"

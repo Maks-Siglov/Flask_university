@@ -111,7 +111,7 @@ add_student_to_group_json = {"student_ids": [9]}
 
 def test_add_students_to_group(client):
     response = client.patch(
-        f"{API_PREFIX}/group/{ADD_STUDENT_TO_GROUP_ID}/append",
+        f"{API_PREFIX}/group/{ADD_STUDENT_TO_GROUP_ID}",
         json=add_student_to_group_json,
     )
     assert response.status_code == 200
@@ -143,9 +143,7 @@ def test_delete_group(client):
 
 
 def test_zero_amount_group(client):
-    response = client.get(
-        f"{API_PREFIX}/group_students_amount/0"
-    )
+    response = client.get(f"{API_PREFIX}/group_students_amount/0")
     assert response.status_code == 404
 
 
@@ -158,9 +156,7 @@ def test_404_group(client, method):
     assert response.status_code == 404
 
 
-invalid_data_json = {
-    "name": 1243
-}
+invalid_data_json = {"name": 1243}
 
 
 test_invalid_data_method_case = ["patch", "put"]

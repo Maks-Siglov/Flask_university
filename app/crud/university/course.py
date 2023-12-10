@@ -8,7 +8,7 @@ from app.crud.university.utils import (
     get_student_by_ids,
     set_value_to_model,
 )
-from app.db.models import Course
+from app.db.models import Course, Student
 from app.db.session import s
 
 
@@ -44,36 +44,39 @@ def update_course(
 ) -> Course:
     """This function update course by provided data"""
     course = set_value_to_model(course, request_data, exclude={"students_ids"})
+
     if request_data.student_ids:
-        if action == "append":
-            _add_students_to_course(course, request_data.student_ids)
+        students = get_student_by_ids(request_data.student_ids)
         if action == "remove":
-            _remove_students_from_course(course, request_data.student_ids)
+            _remove_students_from_course(course, students)
+            return course
+
+        _add_students_to_course(course, students)
 
     return course
 
 
-def _add_students_to_course(course: Course, student_ids: list[int]) -> None:
-    """This function selects students by provided ids, if student already
-    persist on course ValueError raised, after check we add students to course
+def _add_students_to_course(
+        course: Course, students: t.Sequence[Student]
+) -> None:
+    """This function check whether student already persist on course, if yes
+    ValueError raised, after we add students to course
     """
-    new_students = get_student_by_ids(student_ids)
-    for student in new_students:
+    for student in students:
         if student in course.students:
             raise ValueError(
                 f"Student {student.id} already assigned to {course.name}"
             )
-    course.students.extend(new_students)
+    course.students.extend(students)
 
 
 def _remove_students_from_course(
-    course: Course, student_ids: list[int]
+        course: Course, students: t.Sequence[Student]
 ) -> None:
-    """This function selects students by provided ids, if student don't persist
-    on course ValueError raised, after check we remove student from course
+    """This function check whether student don't persist on course, if yes
+    ValueError raised, after we remove student from course
     """
-    removed_students = get_student_by_ids(student_ids)
-    for student in removed_students:
+    for student in students:
         if student not in course.students:
             raise ValueError(
                 f"Student {student.id} don't persist in {course.name}"
