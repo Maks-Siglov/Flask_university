@@ -61,7 +61,7 @@ def update_course(
 
 
 def _add_students_to_course(
-        course: Course, students: t.Sequence[Student]
+    course: Course, students: t.Sequence[Student]
 ) -> None:
     """This function check whether student already persist on course, if yes
     ValueError raised, after we add students to course
@@ -75,7 +75,7 @@ def _add_students_to_course(
 
 
 def _remove_students_from_course(
-        course: Course, students: t.Sequence[Student]
+    course: Course, students: t.Sequence[Student]
 ) -> None:
     """This function check whether student don't persist on course, if yes
     ValueError raised, after we remove student from course

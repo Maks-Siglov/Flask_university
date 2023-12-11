@@ -101,7 +101,7 @@ def _add_student_to_group(student: Student, group_id: int) -> None:
 
 
 def _update_student_with_remove(
-        student: Student, request_data: StudentRequest
+    student: Student, request_data: StudentRequest
 ) -> None:
     """This function remove group and courses by provided ids in request data
     we check group and courses ids if student's group and courses ids not the
@@ -146,7 +146,7 @@ def delete_student(student: Student) -> None:
     s.user_db.delete(student)
 
 
-def _validate_group(group: Group, group_id: int) -> None:
+def _validate_group(group: Group | None, group_id: int) -> None:
     """This function check if group is not None"""
     if not group:
         raise ValueError(f"Group {group_id} don't exist")

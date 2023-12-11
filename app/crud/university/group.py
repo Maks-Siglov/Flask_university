@@ -71,7 +71,7 @@ def update_group(
 
 
 def _add_students_to_group(
-        group: Group, students: t.Sequence[Student]
+    group: Group, students: t.Sequence[Student]
 ) -> None:
     """This function calls validation function, after check we add students to
     the group"""
@@ -80,7 +80,7 @@ def _add_students_to_group(
 
 
 def _remove_students_from_group(
-        group: Group, students: t.Sequence[Student]
+    group: Group, students: t.Sequence[Student]
 ) -> None:
     """This function check whether student don't persist in group, if yes
     ValueError raised, after check we remove student from group
