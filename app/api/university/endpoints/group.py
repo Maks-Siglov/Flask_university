@@ -9,7 +9,7 @@ from app.api.university.api_models.group import (
     GroupResponse,
 )
 from app.crud.university.group import (
-    add_group,
+    post_group,
     delete_group,
     get_all_groups,
     get_group,
@@ -128,7 +128,7 @@ class GroupApi(Resource):
         """
         try:
             group_data = GroupRequest(**request.get_json())
-            group = add_group(group_data)
+            group = post_group(group_data)
         except ValidationError as exc:
             return Response(f"Not valid data, {exc}", status=422)
 

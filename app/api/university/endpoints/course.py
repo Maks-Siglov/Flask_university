@@ -9,7 +9,7 @@ from app.api.university.api_models.course import (
     CourseResponse,
 )
 from app.crud.university.course import (
-    add_course,
+    post_course,
     delete_course,
     get_all_courses,
     get_course,
@@ -106,7 +106,7 @@ class CourseApi(Resource):
         """
         try:
             course_data = CourseRequest(**request.get_json())
-            course = add_course(course_data)
+            course = post_course(course_data)
         except (ValidationError, ValueError) as exc:
             return Response(f"Not valid data, {exc}", status=422)
 

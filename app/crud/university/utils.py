@@ -14,7 +14,7 @@ T = t.TypeVar("T", bound=BaseModel)
 def set_value_to_model(
     model: M, request_data: T, exclude: set[str] | None = None
 ) -> M:
-    """This function set value of request data to model"""
+    """This function set value of request data to model fields"""
     for field, value in request_data.model_dump(
         exclude=exclude, exclude_none=True
     ).items():
@@ -24,7 +24,8 @@ def set_value_to_model(
 
 
 def get_course_by_ids(course_ids: list[int]) -> t.Sequence[Course]:
-    """This functions returns courses by provided ids"""
+    """This functions returns courses by provided ids, if there is no some id
+    ValueError raised"""
     statement = select(Course).where(Course.id.in_(course_ids))
     courses = s.user_db.scalars(statement).all()
     if len(courses) != len(course_ids):
@@ -33,7 +34,8 @@ def get_course_by_ids(course_ids: list[int]) -> t.Sequence[Course]:
 
 
 def get_student_by_ids(student_ids: list[int]) -> t.Sequence[Student]:
-    """This function returns students by provided ids"""
+    """This function returns students by provided ids if there is no some id
+    ValueError raised"""
     statement = select(Student).where(Student.id.in_(student_ids))
     students = s.user_db.scalars(statement).all()
     if len(students) != len(student_ids):

@@ -14,7 +14,7 @@ from app.db.session import s
 
 
 def get_all_students() -> t.Sequence[Student]:
-    """This function returns all students"""
+    """This function returns all students with group and courses"""
     statement = select(Student).options(
         joinedload(Student.group), selectinload(Student.courses)
     )
@@ -22,14 +22,15 @@ def get_all_students() -> t.Sequence[Student]:
 
 
 def get_student(student_id: int) -> Student | None:
-    """This function return student by it id, None if not exist"""
+    """This function return student with courses by it id, None if not exist"""
     return s.user_db.get(
         Student, student_id, options=[joinedload(Student.courses)]
     )
 
 
 def post_student(student_data: StudentRequest) -> Student:
-    """This function insert student to the database"""
+    """This function add student to the database, if course_ids or group_id
+    persist in request data it adds them to student"""
     student = Student(
         **student_data.model_dump(exclude={"course_ids", "group_id"})
     )
@@ -51,11 +52,12 @@ def post_student(student_data: StudentRequest) -> Student:
 def update_student(
     student: Student, request_data: StudentRequest, action: str | None
 ) -> Student:
-    """This function update student by provided data"""
+    """This function update student by provided data, if course_ids or group_id
+    persist in request data we add them to the student by default, if action =
+    "remove" we remove them"""
     student = set_value_to_model(
         student, request_data, exclude={"group_id", "course_ids"}
     )
-
     if action == "remove":
         _update_student_with_remove(student, request_data)
         return student
@@ -73,6 +75,9 @@ def update_student(
 def _add_courses_to_student(
         student: Student, courses: t.Sequence[Course]
 ) -> None:
+    """This function takes courses and check if student don't already assign
+    to them, if yes ValueError raised, after checking curses added to the
+    student"""
     for course in courses:
         if course in student.courses:
             raise ValueError(
@@ -82,6 +87,9 @@ def _add_courses_to_student(
 
 
 def _add_student_to_group(student: Student, group_id: int) -> None:
+    """This function takes group and check if student don't already assign
+    to the another group, if yes ValueError raised, after group checking we add
+    group to the student"""
     if student.group is not None:
         raise ValueError(
             f"Student {student.id} already assigned to {student.group}"
@@ -95,6 +103,10 @@ def _add_student_to_group(student: Student, group_id: int) -> None:
 def _update_student_with_remove(
         student: Student, request_data: StudentRequest
 ) -> None:
+    """This function remove group and courses by provided ids in request data
+    we check group and courses ids if student's group and courses ids not the
+    same as provided id, ValueError raised, after checking we add courses and
+    group to the student"""
     group_id = request_data.group_id
     if group_id:
         if not student.group_id == group_id:
@@ -135,5 +147,6 @@ def delete_student(student: Student) -> None:
 
 
 def _validate_group(group: Group, group_id: int) -> None:
+    """This function check if group is not None"""
     if not group:
         raise ValueError(f"Group {group_id} don't exist")

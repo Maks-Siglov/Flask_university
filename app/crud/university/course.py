@@ -13,20 +13,21 @@ from app.db.session import s
 
 
 def get_all_courses() -> t.Sequence[Course]:
-    """This function returns all courses"""
+    """This function returns all courses with their students"""
     statement = select(Course).options(selectinload(Course.students))
     return s.user_db.scalars(statement).all()
 
 
 def get_course(course_id: int) -> Course | None:
-    """This function return course by it id, None if not exist"""
+    """This function return course with students by it id, None if not exist"""
     return s.user_db.get(
         Course, course_id, options=[joinedload(Course.students)]
     )
 
 
-def add_course(course_data: CourseRequest) -> Course:
-    """This function create course and insert it to the database"""
+def post_course(course_data: CourseRequest) -> Course:
+    """This function create course and insert it to the database if student_ids
+    provided in request data, it also adds them to the course"""
     course = Course(**course_data.model_dump(exclude={"student_ids"}))
 
     if course_data.student_ids:
@@ -42,11 +43,14 @@ def add_course(course_data: CourseRequest) -> Course:
 def update_course(
     course: Course, request_data: CourseRequest, action: str | None
 ) -> Course:
-    """This function update course by provided data"""
+    """This function update group by provided data, if student_ids persist in
+    request data we add them to the course by default, if action = "remove" we
+    remove them"""
     course = set_value_to_model(course, request_data, exclude={"students_ids"})
 
     if request_data.student_ids:
         students = get_student_by_ids(request_data.student_ids)
+
         if action == "remove":
             _remove_students_from_course(course, students)
             return course
@@ -85,7 +89,7 @@ def _remove_students_from_course(
 
 
 def put_course(course: Course, request_data: CourseRequest) -> Course:
-    """This function entirely update the course"""
+    """This function entirely update the course by provided request data"""
     course = set_value_to_model(course, request_data, exclude={"students_ids"})
     course.students.clear()
     assert request_data.student_ids

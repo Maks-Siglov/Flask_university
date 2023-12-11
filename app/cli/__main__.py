@@ -34,6 +34,9 @@ def cli(
     load: bool,
     init: bool,
 ) -> None:
+    """This function provide command line interface, it allows communication
+    with database, you cand set DB_NAME create/drop/recreate run alembic
+    migrations with --init command and fill database with --load command"""
     base_superuser_url = f"{BASE_URL}/{POSTGRESS_DB}"
 
     if drop:
