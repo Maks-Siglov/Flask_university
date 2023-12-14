@@ -9,10 +9,10 @@ from app.api.university.api_models.student import (
     StudentResponse,
 )
 from app.crud.university.student import (
-    post_student,
     delete_student,
     get_all_students,
     get_student,
+    post_student,
     put_student,
     update_student,
 )
@@ -23,6 +23,8 @@ class StudentsApi(Resource):
         """
         This method returns all students with their courses and groups
         ---
+        tags:
+          - Student
         parameters:
           - name: with
             in: query
@@ -63,6 +65,8 @@ class StudentApi(Resource):
         """
         This method return data about student by it id
         ---
+        tags:
+          - Student
         parameters:
           - name: student_id
             in: path
@@ -98,6 +102,8 @@ class StudentApi(Resource):
         """
         This method add a new student to the database
         ---
+        tags:
+          - Student
         parameters:
           - name: first_name
             in: body
@@ -125,6 +131,8 @@ class StudentApi(Resource):
         """
         This method update student in the database by student_id
         ---
+        tags:
+          - Student
         parameters:
           - name: student_id
             in: path
@@ -156,6 +164,8 @@ class StudentApi(Resource):
         """
         This method update student in the database by student_id
         ---
+        tags:
+          - Student
         parameters:
           - name: student_id
             in: path
@@ -185,6 +195,8 @@ class StudentApi(Resource):
         """
         This method remove student from database by student_id
         ---
+        tags:
+          - Student
         parameters:
           - name: student_id
             in: path

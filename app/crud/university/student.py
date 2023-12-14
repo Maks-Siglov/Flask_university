@@ -9,7 +9,7 @@ from app.crud.university.utils import (
     get_course_by_ids,
     set_value_to_model,
 )
-from app.db.models import Student, Course, Group
+from app.db.models import Student, Course
 from app.db.session import s
 
 
@@ -41,7 +41,8 @@ def post_student(student_data: StudentRequest) -> Student:
 
     if student_data.group_id:
         group = get_group(student_data.group_id)
-        _validate_group(group, student_data.group_id)
+        if not group:
+            raise ValueError(f"Group {student_data.group_id} don't exist")
         student.group = group
 
     s.user_db.commit()
@@ -73,7 +74,7 @@ def update_student(
 
 
 def _add_courses_to_student(
-        student: Student, courses: t.Sequence[Course]
+    student: Student, courses: t.Sequence[Course]
 ) -> None:
     """This function takes courses and check if student don't already assign
     to them, if yes ValueError raised, after checking curses added to the
@@ -95,7 +96,8 @@ def _add_student_to_group(student: Student, group_id: int) -> None:
             f"Student {student.id} already assigned to {student.group}"
         )
     group = get_group(group_id)
-    _validate_group(group, group_id)
+    if not group:
+        raise ValueError(f"Group {group_id} don't exist")
 
     student.group = group
 
@@ -135,7 +137,8 @@ def put_student(student: Student, request_data: StudentRequest) -> Student:
 
     assert request_data.group_id
     group = get_group(request_data.group_id)
-    _validate_group(group, request_data.group_id)
+    if not group:
+        raise ValueError(f"Group {request_data.group_id} don't exist")
     student.group = group
 
     return student
@@ -144,9 +147,3 @@ def put_student(student: Student, request_data: StudentRequest) -> Student:
 def delete_student(student: Student) -> None:
     """This function delete student from database"""
     s.user_db.delete(student)
-
-
-def _validate_group(group: Group | None, group_id: int) -> None:
-    """This function check if group is not None"""
-    if not group:
-        raise ValueError(f"Group {group_id} don't exist")

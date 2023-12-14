@@ -4,15 +4,12 @@ from flask import Response, request
 from flask_restful import Resource
 from pydantic import ValidationError
 
-from app.api.university.api_models.course import (
-    CourseRequest,
-    CourseResponse,
-)
+from app.api.university.api_models.course import CourseRequest, CourseResponse
 from app.crud.university.course import (
-    post_course,
     delete_course,
     get_all_courses,
     get_course,
+    post_course,
     put_course,
     update_course,
 )
@@ -23,6 +20,8 @@ class CoursesApi(Resource):
         """
         This method returns all courses with their students
         ---
+        tags:
+          - Course
         parameters:
           - name: with
             in: query
@@ -63,6 +62,8 @@ class CourseApi(Resource):
         """
         This method return data about course by it id
         ---
+        tags:
+          - Course
         parameters:
           - name: course_id
             in: path
@@ -94,6 +95,8 @@ class CourseApi(Resource):
         """
         This method add a new course to the database
         ---
+        tags:
+          - Course
         parameters:
           - name: name
             in: body
@@ -120,6 +123,8 @@ class CourseApi(Resource):
         """
         This method update course in the database by course_id
         ---
+        tags:
+          - Course
         parameters:
           - name: course_id
             in: path
@@ -151,6 +156,8 @@ class CourseApi(Resource):
         """
         This method update entire course in the database by course_id
         ---
+        tags:
+          - Course
         parameters:
           - name: course_id
             in: path
@@ -183,6 +190,8 @@ class CourseApi(Resource):
         """
         This method remove course from database by course_id
         ---
+        tags:
+          - Course
         parameters:
           - name: course_id
             in: path

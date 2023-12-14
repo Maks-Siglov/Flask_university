@@ -4,16 +4,13 @@ from flask import Response, request
 from flask_restful import Resource
 from pydantic import ValidationError
 
-from app.api.university.api_models.group import (
-    GroupRequest,
-    GroupResponse,
-)
+from app.api.university.api_models.group import GroupRequest, GroupResponse
 from app.crud.university.group import (
-    post_group,
     delete_group,
     get_all_groups,
     get_group,
     less_or_equal_students_in_group,
+    post_group,
     put_group,
     update_group,
 )
@@ -24,6 +21,8 @@ class GroupStudentAmountApi(Resource):
         """
         This method retrieves a groups with less or equal student amount
         ---
+        tags:
+          - Group
         parameters:
           - name: student_amount
             in: path
@@ -64,6 +63,8 @@ class GroupsApi(Resource):
         """
         This method returns all groups with their students
         ---
+        tags:
+          - Group
         parameters:
           - name: with
             in: query
@@ -86,6 +87,8 @@ class GroupApi(Resource):
         """
         This method return data about group by it id
         ---
+        tags:
+          - Group
         parameters:
           - name: group_id
             in: path
@@ -116,6 +119,8 @@ class GroupApi(Resource):
         """
         This method add a new group to the database
         ---
+        tags:
+          - Group
         parameters:
           - name: name
             in: body
@@ -142,6 +147,8 @@ class GroupApi(Resource):
         """
         This method update group in the database by group_id
         ---
+        tags:
+          - Group
         parameters:
           - name: group_id
             in: path
@@ -173,6 +180,8 @@ class GroupApi(Resource):
         """
         This method update group in the database by group_id
         ---
+        tags:
+          - Group
         parameters:
           - name: group_id
             in: path
@@ -202,6 +211,8 @@ class GroupApi(Resource):
         """
         This method remove group from database by group_id
         ---
+        tags:
+          - Group
         parameters:
           - name: group_id
             in: path
