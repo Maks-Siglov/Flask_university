@@ -24,7 +24,7 @@ def get_all_students() -> t.Sequence[Student]:
 def get_student(student_id: int) -> Student | None:
     """This function return student with courses by it id, None if not exist"""
     return s.user_db.get(
-        Student, student_id, options=[joinedload(Student.courses)]
+        Student, student_id, options=(joinedload(Student.courses),)
     )
 
 

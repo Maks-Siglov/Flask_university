@@ -8,7 +8,7 @@ from app.crud.university.utils import (
     get_student_by_ids,
     set_value_to_model,
 )
-from app.db.models import Group, Student
+from app.db.models import Group
 from app.db.session import s
 
 
@@ -32,7 +32,9 @@ def less_or_equal_students_in_group(students_amount: int) -> t.Sequence[Group]:
 
 def get_group(group_id: int) -> Group | None:
     """This function return group with students by it id, None if not exist"""
-    return s.user_db.get(Group, group_id, options=[joinedload(Group.students)])
+    return s.user_db.get(
+        Group, group_id, options=(joinedload(Group.students),)
+    )
 
 
 def post_group(group_data: GroupRequest) -> Group:
@@ -41,8 +43,9 @@ def post_group(group_data: GroupRequest) -> Group:
     group = Group(**group_data.model_dump(exclude={"student_ids"}))
 
     if group_data.student_ids:
-        students = get_student_by_ids(group_data.student_ids)
-        _validate_student_to_group(students, group)
+        students = get_student_by_ids(
+            group_data.student_ids, without_group=True
+        )
         group.students.extend(students)
 
     s.user_db.add(group)
@@ -60,36 +63,28 @@ def update_group(
     group = set_value_to_model(group, request_data, exclude={"student_ids"})
 
     if request_data.student_ids:
-        students = get_student_by_ids(request_data.student_ids)
         if action == "remove":
-            _remove_students_from_group(group, students)
+            _remove_students_from_group(group, request_data.student_ids)
             return group
 
-        _add_students_to_group(group, students)
+        _add_students_to_group(group, request_data.student_ids)
 
     return group
 
 
-def _add_students_to_group(
-    group: Group, students: t.Sequence[Student]
-) -> None:
+def _add_students_to_group(group: Group, student_ids: list[int]) -> None:
     """This function calls validation function, after check we add students to
     the group"""
-    _validate_student_to_group(students, group)
+    students = get_student_by_ids(student_ids, without_group=True)
     group.students.extend(students)
 
 
-def _remove_students_from_group(
-    group: Group, students: t.Sequence[Student]
-) -> None:
+def _remove_students_from_group(group: Group, student_ids: list[int]) -> None:
     """This function check whether student don't persist in group, if yes
     ValueError raised, after check we remove student from group
     """
+    students = get_student_by_ids(student_ids, group_id=group.id)
     for student in students:
-        if student not in group.students:
-            raise ValueError(
-                f"Student {student.id} don't persist in {group.name}"
-            )
         group.students.remove(student)
 
 
@@ -99,8 +94,7 @@ def put_group(group: Group, request_data: GroupRequest) -> Group:
     group = set_value_to_model(group, request_data, exclude={"student_ids"})
     group.students.clear()
     assert request_data.student_ids
-    students = get_student_by_ids(request_data.student_ids)
-    _validate_student_to_group(students, group)
+    students = get_student_by_ids(request_data.student_ids, without_group=True)
     group.students.extend(students)
 
     return group
@@ -109,15 +103,3 @@ def put_group(group: Group, request_data: GroupRequest) -> Group:
 def delete_group(group: Group) -> None:
     """This function delete group from database"""
     s.user_db.delete(group)
-
-
-def _validate_student_to_group(
-    students: t.Sequence[Student], group: Group
-) -> None:
-    """This function check whether students assigned to group, if yes
-    ValueError raised"""
-    for student in students:
-        if student.group:
-            raise ValueError(
-                f"Student {student.id} already belong to {group.name}"
-            )
