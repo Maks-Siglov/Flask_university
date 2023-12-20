@@ -32,7 +32,8 @@ def post_student(student_data: StudentRequest) -> Student:
     """This function add student to the database, if course_ids or group_id
     persist in request data it adds them to student"""
     student = Student(
-        **student_data.model_dump(exclude={"course_ids", "group_id"})
+        first_name=student_data.first_name,
+        last_name=student_data.last_name,
     )
     s.user_db.add(student)
     if student_data.course_ids:
@@ -57,7 +58,10 @@ def update_student(
     persist in request data we add them to the student by default, if action =
     "remove" we remove them"""
     student = set_value_to_model(
-        student, request_data, exclude={"group_id", "course_ids"}
+        student,
+        request_data.model_dump(
+            exclude={"courses_ids", "group_id"}, exclude_none=True
+        ),
     )
     if action == "remove":
         _update_student_with_remove(student, request_data)
@@ -128,7 +132,11 @@ def _update_student_with_remove(
 def put_student(student: Student, request_data: StudentRequest) -> Student:
     """This function entirely change the student in the database"""
     student = set_value_to_model(
-        student, request_data, exclude={"group_id", "course_ids"}
+        student,
+        request_data={
+            "first_name": request_data.first_name,
+            "last_name": request_data.last_name,
+        },
     )
     student.courses.clear()
     assert request_data.course_ids

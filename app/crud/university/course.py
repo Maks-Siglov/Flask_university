@@ -6,9 +6,10 @@ from sqlalchemy.orm import joinedload, selectinload
 from app.api.university.api_models.course import CourseRequest
 from app.crud.university.utils import (
     get_student_by_ids,
+    get_student_by_ids_course,
     set_value_to_model,
 )
-from app.db.models import Course, Student
+from app.db.models import Course
 from app.db.session import s
 
 
@@ -28,7 +29,7 @@ def get_course(course_id: int) -> Course | None:
 def post_course(course_data: CourseRequest) -> Course:
     """This function create course and insert it to the database if student_ids
     provided in request data, it also adds them to the course"""
-    course = Course(**course_data.model_dump(exclude={"student_ids"}))
+    course = Course(name=course_data.name, description=course_data.description)
 
     if course_data.student_ids:
         students = get_student_by_ids(course_data.student_ids)
@@ -46,51 +47,38 @@ def update_course(
     """This function update group by provided data, if student_ids persist in
     request data we add them to the course by default, if action = "remove" we
     remove them"""
-    course = set_value_to_model(course, request_data, exclude={"students_ids"})
+    course = set_value_to_model(
+        course,
+        request_data.model_dump(exclude={"students_ids"}, exclude_none=True),
+    )
 
-    if request_data.student_ids:
-        students = get_student_by_ids(request_data.student_ids)
-
+    student_ids = request_data.student_ids
+    if student_ids is not None:
         if action == "remove":
-            _remove_students_from_course(course, students)
+            students = get_student_by_ids_course(
+                student_ids, course_id=course.id, with_course=True
+            )
+            students = list(set(course.students) - set(students))
+            course.students = students
             return course
 
-        _add_students_to_course(course, students)
+        students = get_student_by_ids_course(
+            student_ids, course_id=course.id, with_course=False
+        )
+        course.students.extend(students)
 
     return course
 
 
-def _add_students_to_course(
-    course: Course, students: t.Sequence[Student]
-) -> None:
-    """This function check whether student already persist on course, if yes
-    ValueError raised, after we add students to course
-    """
-    for student in students:
-        if student in course.students:
-            raise ValueError(
-                f"Student {student.id} already assigned to {course.name}"
-            )
-    course.students.extend(students)
-
-
-def _remove_students_from_course(
-    course: Course, students: t.Sequence[Student]
-) -> None:
-    """This function check whether student don't persist on course, if yes
-    ValueError raised, after we remove student from course
-    """
-    for student in students:
-        if student not in course.students:
-            raise ValueError(
-                f"Student {student.id} don't persist in {course.name}"
-            )
-        course.students.remove(student)
-
-
 def put_course(course: Course, request_data: CourseRequest) -> Course:
     """This function entirely update the course by provided request data"""
-    course = set_value_to_model(course, request_data, exclude={"students_ids"})
+    course = set_value_to_model(
+        course,
+        request_data={
+            "name": request_data.name,
+            "description": request_data.description,
+        },
+    )
     course.students.clear()
     assert request_data.student_ids
     students = get_student_by_ids(request_data.student_ids)

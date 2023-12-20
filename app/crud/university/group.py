@@ -6,6 +6,7 @@ from sqlalchemy.orm import joinedload, selectinload
 from app.api.university.api_models.group import GroupRequest
 from app.crud.university.utils import (
     get_student_by_ids,
+    get_student_by_ids_group,
     set_value_to_model,
 )
 from app.db.models import Group
@@ -40,12 +41,10 @@ def get_group(group_id: int) -> Group | None:
 def post_group(group_data: GroupRequest) -> Group:
     """This function create group and insert it to the database if student_ids
     provided in request data, it also adds them to the group"""
-    group = Group(**group_data.model_dump(exclude={"student_ids"}))
+    group = Group(name=group_data.name)
 
     if group_data.student_ids:
-        students = get_student_by_ids(
-            group_data.student_ids, without_group=True
-        )
+        students = get_student_by_ids_group(group_data.student_ids)
         group.students.extend(students)
 
     s.user_db.add(group)
@@ -60,41 +59,32 @@ def update_group(
     """This function update group by provided data, if student_ids persist in
     request data we add them to the group by default, if action = "remove" we
     remove them"""
-    group = set_value_to_model(group, request_data, exclude={"student_ids"})
+    group = set_value_to_model(
+        group,
+        request_data.model_dump(exclude={"students_ids"}, exclude_none=True),
+    )
 
-    if request_data.student_ids:
+    student_ids = request_data.student_ids
+    if student_ids is not None:
         if action == "remove":
-            _remove_students_from_group(group, request_data.student_ids)
+            students = get_student_by_ids_group(student_ids, group_id=group.id)
+            students = list(set(group.students) - set(students))
+            group.students = students
             return group
 
-        _add_students_to_group(group, request_data.student_ids)
+        students = get_student_by_ids(student_ids)
+        group.students.extend(students)
 
     return group
-
-
-def _add_students_to_group(group: Group, student_ids: list[int]) -> None:
-    """This function calls validation function, after check we add students to
-    the group"""
-    students = get_student_by_ids(student_ids, without_group=True)
-    group.students.extend(students)
-
-
-def _remove_students_from_group(group: Group, student_ids: list[int]) -> None:
-    """This function check whether student don't persist in group, if yes
-    ValueError raised, after check we remove student from group
-    """
-    students = get_student_by_ids(student_ids, group_id=group.id)
-    for student in students:
-        group.students.remove(student)
 
 
 def put_group(group: Group, request_data: GroupRequest) -> Group:
     """This function overwrites group in the database by provided request
     data"""
-    group = set_value_to_model(group, request_data, exclude={"student_ids"})
+    group = set_value_to_model(group, request_data={"name": request_data.name})
     group.students.clear()
     assert request_data.student_ids
-    students = get_student_by_ids(request_data.student_ids, without_group=True)
+    students = get_student_by_ids_group(request_data.student_ids)
     group.students.extend(students)
 
     return group
