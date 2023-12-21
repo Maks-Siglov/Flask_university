@@ -6,10 +6,9 @@ from sqlalchemy.orm import joinedload, selectinload
 from app.api.university.api_models.group import GroupRequest
 from app.crud.university.utils import (
     get_student_by_ids,
-    get_student_by_ids_group,
     set_value_to_model,
 )
-from app.db.models import Group
+from app.db.models import Group, Student
 from app.db.session import s
 
 
@@ -44,7 +43,7 @@ def post_group(group_data: GroupRequest) -> Group:
     group = Group(name=group_data.name)
 
     if group_data.student_ids:
-        students = get_student_by_ids_group(group_data.student_ids)
+        students = _get_student_by_ids_group(group_data.student_ids)
         group.students.extend(students)
 
     s.user_db.add(group)
@@ -67,7 +66,9 @@ def update_group(
     student_ids = request_data.student_ids
     if student_ids is not None:
         if action == "remove":
-            students = get_student_by_ids_group(student_ids, group_id=group.id)
+            students = _get_student_by_ids_group(
+                student_ids, group_id=group.id
+            )
             students = list(set(group.students) - set(students))
             group.students = students
             return group
@@ -84,7 +85,7 @@ def put_group(group: Group, request_data: GroupRequest) -> Group:
     group = set_value_to_model(group, request_data={"name": request_data.name})
     group.students.clear()
     assert request_data.student_ids
-    students = get_student_by_ids_group(request_data.student_ids)
+    students = _get_student_by_ids_group(request_data.student_ids)
     group.students.extend(students)
 
     return group
@@ -93,3 +94,25 @@ def put_group(group: Group, request_data: GroupRequest) -> Group:
 def delete_group(group: Group) -> None:
     """This function delete group from database"""
     s.user_db.delete(group)
+
+
+def _get_student_by_ids_group(
+    student_ids: list[int], group_id: int | None = None
+) -> t.Sequence[Student]:
+    """By default, this function return students by provided ids which not
+    assigned to group, but if group_id provided, function return students
+    assigned to group"""
+    statement = select(Student).where(Student.id.in_(student_ids))
+
+    if group_id is not None:
+        statement.where(Student.group_id == group_id)
+    else:
+        statement.where(Student.group_id.is_(None))
+
+    students = s.user_db.scalars(statement).all()
+    if len(students) != len(student_ids):
+        ids = set(student_ids) - {student.id for student in students}
+        raise ValueError(
+            f"There is no students {ids} with group id {group_id}"
+        )
+    return students

@@ -1,15 +1,14 @@
 import typing as t
 
-from sqlalchemy import select
+from sqlalchemy import select, not_
 from sqlalchemy.orm import joinedload, selectinload
 
 from app.api.university.api_models.course import CourseRequest
 from app.crud.university.utils import (
     get_student_by_ids,
-    get_student_by_ids_course,
     set_value_to_model,
 )
-from app.db.models import Course
+from app.db.models import Course, Student
 from app.db.session import s
 
 
@@ -55,14 +54,14 @@ def update_course(
     student_ids = request_data.student_ids
     if student_ids is not None:
         if action == "remove":
-            students = get_student_by_ids_course(
+            students = _get_student_by_ids_course(
                 student_ids, course_id=course.id, with_course=True
             )
             students = list(set(course.students) - set(students))
             course.students = students
             return course
 
-        students = get_student_by_ids_course(
+        students = _get_student_by_ids_course(
             student_ids, course_id=course.id, with_course=False
         )
         course.students.extend(students)
@@ -100,3 +99,27 @@ def get_course_by_name(course_name: str) -> Course | None:
         .where(Course.name == course_name)
     )
     return s.user_db.scalar(statement)
+
+
+def _get_student_by_ids_course(
+    student_ids: list[int], course_id: int, with_course: bool
+) -> t.Sequence[Student]:
+    """This function return students by provided ids, if with_course set to
+    True function return students which assigned to course by course id, else
+    students without provided course_id"""
+    statement = select(Student).where(Student.id.in_(student_ids))
+
+    if with_course:
+        statement.where(Student.courses.any(Course.id == course_id))
+    else:
+        statement.where(not_(Student.courses.any(Course.id == course_id)))
+
+    students = s.user_db.scalars(statement).all()
+    if len(students) != len(student_ids):
+        ids = set(student_ids) - {student.id for student in students}
+        word = "" if with_course else "don't"
+        raise ValueError(
+            f"There is no students {ids} which {word} assigned to "
+            f"course {course_id}"
+        )
+    return students

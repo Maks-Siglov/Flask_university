@@ -1,6 +1,6 @@
 import typing as t
 
-from sqlalchemy import select
+from sqlalchemy import select, not_
 from sqlalchemy.orm import joinedload, selectinload
 
 from app.api.university.api_models.student import StudentRequest
@@ -8,9 +8,8 @@ from app.crud.university.group import get_group
 from app.crud.university.utils import (
     get_course_by_ids,
     set_value_to_model,
-    get_course_by_ids_student,
 )
-from app.db.models import Student
+from app.db.models import Student, Course
 from app.db.session import s
 
 
@@ -69,7 +68,7 @@ def update_student(
         return student
 
     if request_data.course_ids:
-        courses = get_course_by_ids_student(
+        courses = _get_course_by_ids_student(
             request_data.course_ids, student_id=student.id, with_student=False
         )
         student.courses.extend(courses)
@@ -102,7 +101,7 @@ def _update_student_with_remove(
         student.group_id = None
 
     if request_data.course_ids:
-        courses = get_course_by_ids_student(
+        courses = _get_course_by_ids_student(
             request_data.course_ids, student_id=student.id, with_student=True
         )
         for course in courses:
@@ -135,3 +134,20 @@ def put_student(student: Student, request_data: StudentRequest) -> Student:
 def delete_student(student: Student) -> None:
     """This function delete student from database"""
     s.user_db.delete(student)
+
+
+def _get_course_by_ids_student(course_ids, student_id, with_student):
+    statement = select(Course).where(Course.id.in_(course_ids))
+    if with_student:
+        statement.where(Course.students.any(Student.id == student_id))
+    elif not with_student:
+        statement.where(not_(Course.students.any(Student.id == student_id)))
+    courses = s.user_db.scalars(statement).all()
+    if len(courses) != len(course_ids):
+        ids = set(course_ids) - {course.id for course in courses}
+        word = "" if with_student else "don't"
+        raise ValueError(
+            f"There is no courses {ids} which {word} assigned "
+            f"student {student_id}"
+        )
+    return courses
