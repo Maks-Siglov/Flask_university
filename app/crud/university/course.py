@@ -105,7 +105,7 @@ def _get_student_by_ids_course(
     student_ids: list[int], course_id: int, with_course: bool
 ) -> t.Sequence[Student]:
     """This function return students by provided ids, if with_course set to
-    True function return students which assigned to course by course id, else
+    True function return students which assigned to course by course_id, else
     students without provided course_id"""
     statement = select(Student).where(Student.id.in_(student_ids))
 

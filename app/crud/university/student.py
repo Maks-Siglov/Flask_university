@@ -67,7 +67,7 @@ def update_student(
         _update_student_with_remove(student, request_data)
         return student
 
-    if request_data.course_ids:
+    if request_data.course_ids is not None:
         courses = _get_course_by_ids_student(
             request_data.course_ids, student_id=student.id, with_student=False
         )
@@ -100,7 +100,7 @@ def _update_student_with_remove(
             raise ValueError(f"Student {student.id} not in group {group_id}")
         student.group_id = None
 
-    if request_data.course_ids:
+    if request_data.course_ids is not None:
         courses = _get_course_by_ids_student(
             request_data.course_ids, student_id=student.id, with_student=True
         )
@@ -137,6 +137,9 @@ def delete_student(student: Student) -> None:
 
 
 def _get_course_by_ids_student(course_ids, student_id, with_student):
+    """This function return courses by provided ids, if with_student set to
+    True function return students which assigned to student by student_id, else
+    students without provided student_id"""
     statement = select(Course).where(Course.id.in_(course_ids))
     if with_student:
         statement.where(Course.students.any(Student.id == student_id))
