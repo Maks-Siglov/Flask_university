@@ -8,8 +8,9 @@ from app.crud.university.group import get_group
 from app.crud.university.utils import (
     get_course_by_ids,
     set_value_to_model,
+    get_course_by_ids_student,
 )
-from app.db.models import Student, Course
+from app.db.models import Student
 from app.db.session import s
 
 
@@ -68,42 +69,23 @@ def update_student(
         return student
 
     if request_data.course_ids:
-        courses = get_course_by_ids(request_data.course_ids)
-        _add_courses_to_student(student, courses)
+        courses = get_course_by_ids_student(
+            request_data.course_ids, student_id=student.id, with_student=False
+        )
+        student.courses.extend(courses)
 
-    if request_data.group_id:
-        _add_student_to_group(student, request_data.group_id)
+    group_id = request_data.group_id
+    if group_id:
+        if student.group is not None:
+            raise ValueError(
+                f"Student {student.id} already assigned to {student.group}"
+            )
+        group = get_group(group_id)
+        if not group:
+            raise ValueError(f"Group {group_id} don't exist")
+        student.group = group
 
     return student
-
-
-def _add_courses_to_student(
-    student: Student, courses: t.Sequence[Course]
-) -> None:
-    """This function takes courses and check if student don't already assign
-    to them, if yes ValueError raised, after checking curses added to the
-    student"""
-    for course in courses:
-        if course in student.courses:
-            raise ValueError(
-                f"Student {student.id} already assigned to {course}"
-            )
-    student.courses.extend(courses)
-
-
-def _add_student_to_group(student: Student, group_id: int) -> None:
-    """This function takes group and check if student don't already assign
-    to the another group, if yes ValueError raised, after group checking we add
-    group to the student"""
-    if student.group is not None:
-        raise ValueError(
-            f"Student {student.id} already assigned to {student.group}"
-        )
-    group = get_group(group_id)
-    if not group:
-        raise ValueError(f"Group {group_id} don't exist")
-
-    student.group = group
 
 
 def _update_student_with_remove(
@@ -120,12 +102,10 @@ def _update_student_with_remove(
         student.group_id = None
 
     if request_data.course_ids:
-        courses = get_course_by_ids(request_data.course_ids)
+        courses = get_course_by_ids_student(
+            request_data.course_ids, student_id=student.id, with_student=True
+        )
         for course in courses:
-            if course not in student.courses:
-                raise ValueError(
-                    f"Student {student.id} don't assign to {course}"
-                )
             student.courses.remove(course)
 
 

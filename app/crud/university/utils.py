@@ -28,6 +28,19 @@ def get_course_by_ids(course_ids: list[int]) -> t.Sequence[Course]:
     return courses
 
 
+def get_course_by_ids_student(course_ids, student_id, with_student):
+    statement = select(Course).where(Course.id.in_(course_ids))
+    if with_student:
+        statement.where(Course.students.any(Student.id == student_id))
+    elif not with_student:
+        statement.where(not_(Course.students.any(Student.id == student_id)))
+    courses = s.user_db.scalars(statement).all()
+    if len(courses) != len(course_ids):
+        ids = set(course_ids) - {course.id for course in courses}
+        raise ValueError(f"There is no courses with this ids {ids}")
+    return courses
+
+
 def get_student_by_ids(student_ids: list[int]) -> t.Sequence[Student]:
     """This function returns students by provided ids"""
     statement = select(Student).where(Student.id.in_(student_ids))
