@@ -28,6 +28,13 @@ def get_student(student_id: int) -> Student | None:
     )
 
 
+def get_student_by_name(student_name: str) -> Student | None:
+    """This function return student by provided first name"""
+    return s.user_db.scalar(
+        select(Student).where(Student.first_name == student_name)
+    )
+
+
 def post_student(student_data: StudentRequest) -> Student:
     """This function add student to the database, if course_ids or group_id
     persist in request data it adds them to student"""
@@ -35,16 +42,19 @@ def post_student(student_data: StudentRequest) -> Student:
         first_name=student_data.first_name,
         last_name=student_data.last_name,
     )
-    s.user_db.add(student)
-    if student_data.course_ids:
-        courses = get_course_by_ids(student_data.course_ids)
-        student.courses.extend(courses)
+    try:
+        s.user_db.add(student)
+        if student_data.course_ids:
+            courses = get_course_by_ids(student_data.course_ids)
+            student.courses.extend(courses)
 
-    if student_data.group_id:
-        group = get_group(student_data.group_id)
-        if not group:
-            raise ValueError(f"Group {student_data.group_id} don't exist")
-        student.group = group
+        if student_data.group_id:
+            group = get_group(student_data.group_id)
+            if not group:
+                raise ValueError(f"Group {student_data.group_id} don't exist")
+            student.group = group
+    except ValueError:
+        s.user_db.delete(student)
 
     s.user_db.commit()
     s.user_db.refresh(student)
