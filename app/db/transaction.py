@@ -15,7 +15,8 @@ T = TypeVar("T")
 def transaction(func: Callable[P, T]) -> Callable[P, T]:
     @wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-        s.user_db_transaction = s.user_db.begin()
+        if s.user_db_transaction is None:
+            s.user_db_transaction = s.user_db.begin()
         assert s.user_db_transaction is not None
         try:
             result = func(*args, **kwargs)
