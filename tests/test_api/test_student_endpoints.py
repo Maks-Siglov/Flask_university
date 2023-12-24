@@ -163,6 +163,27 @@ def test_put_student(client):
     assert len(response_data["courses"]) == len(course_ids)
 
 
+INVALID_PUT_STUDENT_ID = 18
+put_student_invalid_group_json = {
+    "first_name": "Invalid_put_first_name",
+    "last_name": "William",
+    "group_id": 100,
+    "course_ids": [1, 2],
+}
+
+
+def test_put_student_with_invalid_group(client):
+    client.put(
+        f"{API_PREFIX}/student/{INVALID_PUT_STUDENT_ID}",
+        json=put_student_invalid_group_json,
+    )
+    set_session()
+    student_name = put_student_invalid_group_json["first_name"]
+    student = get_student_by_name(student_name)
+    assert student is None
+    pop_session()
+
+
 DELETE_STUDENT_ID = 5
 
 

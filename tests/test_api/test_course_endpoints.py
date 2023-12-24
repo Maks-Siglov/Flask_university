@@ -2,6 +2,8 @@ import json
 
 import pytest
 
+from app.crud.university.course import get_course_by_name
+from app.db.session import set_session, pop_session
 from app.configs import API_PREFIX
 from app.init_routers import (
     COURSE_POST_ROUTE,
@@ -161,6 +163,21 @@ def test_put_course(client):
     assert len(response_data["students"]) == len(
         put_course_json["student_ids"]
     )
+
+
+INVALID_PUT_ID = 1
+invalid_put_json = {
+    "name": "Test_put_name",
+    "description": "Test_put_description",
+}
+
+
+def test_put_course_without_students(client):
+    client.put(f"{API_PREFIX}/course/{INVALID_PUT_ID}", json=invalid_put_json)
+    set_session()
+    course = get_course_by_name(invalid_put_json["name"])
+    assert course is None
+    pop_session()
 
 
 DELETE_COURSE_ID = 5

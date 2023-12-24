@@ -37,6 +37,11 @@ def get_group(group_id: int) -> Group | None:
     )
 
 
+def get_group_by_name(group_name: str) -> Group | None:
+    """This function return group by provided name"""
+    return s.user_db.scalar(select(Group).where(Group.name == group_name))
+
+
 def post_group(group_data: GroupRequest) -> Group:
     """This function create group and insert it to the database if student_ids
     provided in request data, it also adds them to the group"""

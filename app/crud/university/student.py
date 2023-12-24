@@ -4,6 +4,7 @@ from sqlalchemy import select, not_
 from sqlalchemy.orm import joinedload, selectinload
 
 from app.api.university.api_models.student import StudentRequest
+from app.db.transaction import transaction
 from app.crud.university.group import get_group
 from app.crud.university.utils import (
     get_course_by_ids,
@@ -117,6 +118,7 @@ def _update_student_with_remove(
             student.courses.remove(course)
 
 
+@transaction
 def put_student(student: Student, request_data: StudentRequest) -> Student:
     """This function entirely change the student in the database"""
     student = set_value_to_model(

@@ -8,13 +8,13 @@ COURSE_THREE = {"name": "Course 3", "description": "Description 3"}
 COURSE_WITHOUT_STUDENT = {"name": "Course 4", "description": "Description 4"}
 COURSE_FOR_DELETION = {"name": "Course 5", "description": "Description 5"}
 
-AMOUNT_GROUP_WITHOUT_STUDENT = 4
+AMOUNT_GROUP_WITHOUT_STUDENT = 5
 
 Group_ONE = {"name": "TT-31"}
 GROUT_TWO = {"name": "FF-22"}
 GROUP_THREE = {"name": "BA-19"}
 
-AMOUNT_STUDENT_WITHOUT_RELATION = 14
+AMOUNT_STUDENT_WITHOUT_RELATION = 15
 
 STUDENT_ONE = {"first_name": "John", "last_name": "Doe"}
 STUDENT_TWO = {"first_name": "Jane", "last_name": "Willi"}
