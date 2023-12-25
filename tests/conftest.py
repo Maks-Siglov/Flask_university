@@ -1,6 +1,7 @@
 import pytest
 
 from app.app import create_app
+from app.db.session import get_sync_pool, s
 from app.configs import (
     BASE_URL,
     DB_NAME,
@@ -29,6 +30,18 @@ def app():
 @pytest.fixture(scope="session")
 def client(app):
     return app.test_client()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def db_set_session() -> None:
+    current_pool = get_sync_pool(f"{BASE_URL}/{DB_NAME}", {})
+    s.user_db = current_pool.maker()
+    s.user_db.connection(execution_options={"isolation_level": "SERIALIZABLE"})
+    yield
+    try:
+        s.user_db.commit()
+    finally:
+        s.user_db.close()
 
 
 @pytest.hookimpl(tryfirst=True)

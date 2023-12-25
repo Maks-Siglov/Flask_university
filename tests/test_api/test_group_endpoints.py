@@ -3,7 +3,6 @@ import json
 import pytest
 
 from app.crud.university.group import get_group_by_name
-from app.db.session import set_session, pop_session
 from app.configs import API_PREFIX
 from app.init_routers import (
     GROUP_POST_ROUTE,
@@ -141,10 +140,8 @@ invalid_put_json = {"name": "BB-22"}
 
 def test_put_group_without_students(client):
     client.put(f"{API_PREFIX}/group/{INVALID_PUT_ID}", json=invalid_put_json)
-    set_session()
     group = get_group_by_name(invalid_put_json["name"])
     assert group is None
-    pop_session()
 
 
 DELETE_GROUP_ID = 8

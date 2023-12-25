@@ -4,7 +4,6 @@ import pytest
 
 from app.configs import API_PREFIX
 from app.crud.university.student import get_student_by_name
-from app.db.session import set_session, pop_session
 from app.init_routers import (
     STUDENT_POST_ROUTE,
     STUDENTS_ROUTE,
@@ -75,10 +74,8 @@ post_invalid_group_student_json = {
 
 def test_post_student_with_invalid_group(client):
     client.post(STUDENT_POST_ROUTE, json=post_invalid_group_student_json)
-    set_session()
     student = get_student_by_name("David_Invalid_Group")
     assert student is None
-    pop_session()
 
 
 UPDATE_WITH_ADD_STUDENT_ID = 5
@@ -177,11 +174,9 @@ def test_put_student_with_invalid_group(client):
         f"{API_PREFIX}/student/{INVALID_PUT_STUDENT_ID}",
         json=put_student_invalid_group_json,
     )
-    set_session()
     student_name = put_student_invalid_group_json["first_name"]
     student = get_student_by_name(student_name)
     assert student is None
-    pop_session()
 
 
 DELETE_STUDENT_ID = 5
