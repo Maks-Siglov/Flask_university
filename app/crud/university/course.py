@@ -9,6 +9,7 @@ from app.crud.university.utils import (
     set_value_to_model,
 )
 from app.db.models import Course, Student
+from app.db.transaction import transaction
 from app.db.session import s
 
 
@@ -25,6 +26,7 @@ def get_course(course_id: int) -> Course | None:
     )
 
 
+@transaction
 def post_course(course_data: CourseRequest) -> Course:
     """This function create course and insert it to the database if student_ids
     provided in request data, it also adds them to the course"""
@@ -35,11 +37,10 @@ def post_course(course_data: CourseRequest) -> Course:
         course.students.extend(students)
 
     s.user_db.add(course)
-    s.user_db.commit()
-    s.user_db.refresh(course)
     return course
 
 
+@transaction
 def update_course(
     course: Course, request_data: CourseRequest, action: str | None
 ) -> Course:
@@ -69,6 +70,7 @@ def update_course(
     return course
 
 
+@transaction
 def put_course(course: Course, request_data: CourseRequest) -> Course:
     """This function entirely update the course by provided request data"""
     course = set_value_to_model(

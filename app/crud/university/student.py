@@ -36,6 +36,7 @@ def get_student_by_name(student_name: str) -> Student | None:
     )
 
 
+@transaction
 def post_student(student_data: StudentRequest) -> Student:
     """This function add student to the database, if course_ids or group_id
     persist in request data it adds them to student"""
@@ -52,15 +53,13 @@ def post_student(student_data: StudentRequest) -> Student:
     if student_data.group_id:
         group = get_group(student_data.group_id)
         if not group:
-            s.user_db.delete(student)
             raise ValueError(f"Group {student_data.group_id} don't exist")
         student.group = group
 
-    s.user_db.commit()
-    s.user_db.refresh(student)
     return student
 
 
+@transaction
 def update_student(
     student: Student, request_data: StudentRequest, action: str | None
 ) -> Student:

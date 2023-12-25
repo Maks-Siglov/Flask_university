@@ -9,6 +9,7 @@ from app.crud.university.utils import (
     set_value_to_model,
 )
 from app.db.models import Group, Student
+from app.db.transaction import transaction
 from app.db.session import s
 
 
@@ -42,6 +43,7 @@ def get_group_by_name(group_name: str) -> Group | None:
     return s.user_db.scalar(select(Group).where(Group.name == group_name))
 
 
+@transaction
 def post_group(group_data: GroupRequest) -> Group:
     """This function create group and insert it to the database if student_ids
     provided in request data, it also adds them to the group"""
@@ -52,11 +54,10 @@ def post_group(group_data: GroupRequest) -> Group:
         group.students.extend(students)
 
     s.user_db.add(group)
-    s.user_db.commit()
-    s.user_db.refresh(group)
     return group
 
 
+@transaction
 def update_group(
     group: Group, request_data: GroupRequest, action: str | None
 ) -> Group:
@@ -84,6 +85,7 @@ def update_group(
     return group
 
 
+@transaction
 def put_group(group: Group, request_data: GroupRequest) -> Group:
     """This function overwrites group in the database by provided request
     data"""
