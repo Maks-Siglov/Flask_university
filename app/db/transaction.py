@@ -15,8 +15,8 @@ T = TypeVar("T")
 def transaction(func: Callable[P, T]) -> Callable[P, T]:
     @wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-        if s.user_db_transaction is None:
-            s.user_db_transaction = s.user_db.begin()
+        s.user_db.commit()
+        s.user_db_transaction = s.user_db.begin()
         assert s.user_db_transaction is not None
         try:
             result = func(*args, **kwargs)
@@ -28,24 +28,19 @@ def transaction(func: Callable[P, T]) -> Callable[P, T]:
                 except Exception:
                     log.exception("Error during transaction rollback")
             raise e
+        else:
+            try:
+                s.user_db_transaction.commit()
+            except Exception as exc:
+                _, _, exc_trace = sys.exc_info()
+                try:
+                    s.user_db_transaction.rollback()
+                except Exception:
+                    log.exception("Error during transaction rollback")
+                raise exc.with_traceback(exc_trace)
         finally:
             s.user_db.commit()
             s.user_db_transaction = None
-        _end_transaction()
         return result
 
     return wrapper
-
-
-def _end_transaction() -> None:
-    assert s.user_db_transaction
-    try:
-        s.user_db_transaction.commit()
-    except Exception as exc:
-        _, _, exc_trace = sys.exc_info()
-        try:
-            s.user_db_transaction.rollback()
-        except Exception:
-            log.exception("Error during transaction rollback")
-
-        raise exc.with_traceback(exc_trace)
