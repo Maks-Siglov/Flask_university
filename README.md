@@ -1,79 +1,60 @@
 University Management System
-Overview
-The University Management System is a Python-based web application that provides CRUD 
-(Create, Read, Update, Delete) operations for managing students, groups, and courses. The system 
-uses PostgreSQL as the backend database and includes a CLI (Command Line Interface) for database 
-management and Alembic migrations.
+The University Management System is a Python-based web application that facilitates CRUD (Create, Read, Update, Delete)
+operations for managing students, groups, and courses. Utilizing PostgreSQL as the backend database,
+the system also integrates a Command Line Interface (CLI) for database management and Alembic migrations.
 
 Features
-Students: Create, retrieve, update, and delete student, group and courses records,  including the 
-ability to add students to course and group.
-
+Students
+Create, retrieve, update, and delete student records.
+Add students to courses and groups.
 Setup
 Database Configuration
-Database Creation:
-
 Use the CLI to create the database:
+
+
 python -m app.cli --create
-you also can add --load if you want to fill db with dummy students
-if you want to drop db use --drop and --recreate for recreation
-
+Add --load to populate the database with dummy student data.
+Use --drop to delete the database, and --recreate for database recreation.
 Install the required Python dependencies using poetry:
-poetry install
-Run the Application:
 
+
+poetry install
+Run the Application
 Start the web application:
+
+
 python -m app.app
 Access the API at http://localhost:5000.
 
 API Routes
 Group Management
-
-Get Groups with less or equal student amount:
+Get Groups with Less or Equal Student Amount
 Endpoint: api/v1/group_students_amount/{student_amount}
 Method: GET
-Description: Retrieve a list of all groups with less or equal student amount 
-
-Get Groups:
+Description: Retrieve a list of all groups with less or equal student amount.
+Get Groups
 Endpoint: api/v1/groups
 Method: GET
-Description: Retrieve a list of all groups. By default, it returns groups without student, but you
-can add query parameter api/v1/groups/?with=students to add it will return groups with students
-
-Get Group Details:
-Endpoint:  api/v1/group/{group_id}
+Description: Retrieve a list of all groups.
+Get Group Details
+Endpoint: api/v1/group/{group_id}
 Method: GET
-Description: Get details of a specific  group by provided id.
+Description: Get details of a specific group by provided id.
+Create Group
+Endpoint: api/v1/group
 
-Create Group:
-Endpoint:  api/v1/group
 Method: POST
-Description: Create a new group. You need to send json with  "name" field also you can specify 
-"student_ids" field if you want to add students to this group. Example:
-{
-    "name": "EF-56",
-    "student_ids": [20, 25, 27, 30]
-}
 
-Update Group:
-Endpoint:  api/v1/group/{group_id}
-Method: PATCH
-Description: Update details of a specific group. You can provide "name" or "student_ids" or both
-fields, if you provide "student_ids" with list of ids, function ,by default, add them to the group,
-but you can provide a query parameter api/v1/group/{group_id}/?action=remove and function will 
-remove students with provided ids from the group
-Method: PUT
-Description: Entirely update a specific group. You need to specify both "name" and "student_ids" 
-fields. Example:
-{
-    "name": "PT-22",
-    "student_ids": [10, 11, 33, 22, 41, 5]
-}
+Description: Create a new group. Send JSON with "name" field; optionally, specify "student_ids" field to add students to this group.
 
-Delete Group:
-Endpoint:  api/v1/group/{group_id}
-Method: DELETE
-Description: Delete a specific group.
+Example:
+
+json
+Copy code
+{
+  "name": "EF-56",
+  "student_ids": [20, 25, 27, 30]
+}
 
 Student Management
 
