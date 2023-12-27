@@ -170,10 +170,10 @@ class GroupApi(Resource):
 
         try:
             request_data = GroupRequest(**request.get_json())
+            updated_group = update_group(group, request_data, action)
         except ValueError as exc:
             return Response(f"Not valid data, {exc}", status=422)
 
-        updated_group = update_group(group, request_data, action)
         return GroupResponse.model_validate(updated_group).model_dump()
 
     def put(self, group_id: int) -> dict[str, t.Any] | Response:
@@ -201,13 +201,13 @@ class GroupApi(Resource):
         try:
             request_data = GroupRequest(**request.get_json())
             request_data.check_not_none_field()
-        except ValueError as exc:
+            putted_group = put_group(group, request_data)
+        except (ValidationError, ValueError) as exc:
             return Response(f"Not valid data, {exc}", status=422)
 
-        putted_group = put_group(group, request_data)
         return GroupResponse.model_validate(putted_group).model_dump()
 
-    def delete(self, group_id: int):
+    def delete(self, group_id: int) -> Response:
         """
         This method remove group from database by group_id
         ---

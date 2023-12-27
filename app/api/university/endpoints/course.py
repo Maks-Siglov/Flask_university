@@ -109,9 +109,13 @@ class CourseApi(Resource):
         """
         try:
             course_data = CourseRequest(**request.get_json())
-            course = post_course(course_data)
-        except (ValidationError, ValueError) as exc:
+        except ValidationError as exc:
             return Response(f"Not valid data, {exc}", status=422)
+
+        try:
+            course = post_course(course_data)
+        except ValueError as exc:
+            return Response(f"Not correct data, {exc}", status=422)
 
         return Response(
             CourseResponse.model_validate(course).model_dump_json(), 201
@@ -149,7 +153,10 @@ class CourseApi(Resource):
         except ValidationError as exc:
             return Response(f"Not valid data, {exc}", status=422)
 
-        updated_course = update_course(course, request_data, action)
+        try:
+            updated_course = update_course(course, request_data, action)
+        except ValueError as exc:
+            return Response(f"Not correct data, {exc}", status=422)
         return CourseResponse.model_validate(updated_course).model_dump()
 
     def put(self, course_id: int) -> dict[str, t.Any] | Response:
@@ -180,10 +187,10 @@ class CourseApi(Resource):
         try:
             request_data = CourseRequest(**request.get_json())
             request_data.check_not_none_field()
-        except ValidationError as exc:
+            putted_course = put_course(course, request_data)
+        except (ValidationError, ValueError) as exc:
             return Response(f"Not valid data, {exc}", status=422)
 
-        putted_course = put_course(course, request_data)
         return CourseResponse.model_validate(putted_course).model_dump()
 
     def delete(self, course_id: int):

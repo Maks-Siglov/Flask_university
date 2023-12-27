@@ -122,7 +122,11 @@ class StudentApi(Resource):
         except ValidationError as exc:
             return Response(f"Not valid data, {exc}", status=422)
 
-        new_student = post_student(student_data)
+        try:
+            new_student = post_student(student_data)
+        except ValueError as exc:
+            return Response(f"Not correct data, {exc}", status=422)
+
         return StudentResponse.model_validate(new_student).model_dump()
 
     def patch(
@@ -157,7 +161,11 @@ class StudentApi(Resource):
         except ValidationError as exc:
             return Response(f"Not valid data, {exc}", status=422)
 
-        updated_student = update_student(student, request_data, action)
+        try:
+            updated_student = update_student(student, request_data, action)
+        except ValueError as exc:
+            return Response(f"Not correct data, {exc}", status=422)
+
         return StudentResponse.model_validate(updated_student).model_dump()
 
     def put(self, student_id: int) -> dict[str, t.Any] | Response:
@@ -185,10 +193,10 @@ class StudentApi(Resource):
         try:
             request_data = StudentRequest(**request.get_json())
             request_data.check_not_none_field()
-        except ValidationError as exc:
+            putted_student = put_student(student, request_data)
+        except (ValidationError, ValueError) as exc:
             return Response(f"Not valid data, {exc}", status=422)
 
-        putted_student = put_student(student, request_data)
         return StudentResponse.model_validate(putted_student).model_dump()
 
     def delete(self, student_id: int) -> Response:

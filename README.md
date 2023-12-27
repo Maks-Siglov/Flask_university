@@ -29,10 +29,15 @@ Access the API at http://localhost:5000.
 API Routes
 Group Management
 
+Get Groups with less or equal student amount:
+Endpoint: api/v1/group_students_amount/{student_amount}
+Method: GET
+Description: Retrieve a list of all groups with less or equal student amount 
+
 Get Groups:
 Endpoint: api/v1/groups
 Method: GET
-Description: Retrieve a list of all  groups. By default, it returns groups without student, but you
+Description: Retrieve a list of all groups. By default, it returns groups without student, but you
 can add query parameter api/v1/groups/?with=students to add it will return groups with students
 
 Get Group Details:

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.models.base import Base
 from app.db.models.student_course_association import (
-    StudentCourseAssociationTable,
+    StudentToCourse,
 )
 
 if TYPE_CHECKING:
@@ -20,7 +20,7 @@ class Course(Base):
     description: Mapped[str] = mapped_column()
 
     students: Mapped[list["Student"]] = relationship(
-        secondary=StudentCourseAssociationTable.__table__,
+        secondary=StudentToCourse.__table__,
         back_populates="courses",
         join_depth=1,
     )

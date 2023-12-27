@@ -72,8 +72,24 @@ def update_student(
             exclude={"courses_ids", "group_id"}, exclude_none=True
         ),
     )
+    group_id = request_data.group_id
     if action == "remove":
-        _update_student_with_remove(student, request_data)
+        if group_id:
+            if not student.group_id == group_id:
+                raise ValueError(
+                    f"Student {student.id} not in group {group_id}"
+                )
+            student.group_id = None
+
+        if request_data.course_ids is not None:
+            courses = _get_course_by_ids_student(
+                request_data.course_ids,
+                student_id=student.id,
+                with_student=True,
+            )
+            for course in courses:
+                student.courses.remove(course)
+
         return student
 
     if request_data.course_ids is not None:
@@ -82,7 +98,6 @@ def update_student(
         )
         student.courses.extend(courses)
 
-    group_id = request_data.group_id
     if group_id:
         if student.group is not None:
             raise ValueError(
@@ -94,27 +109,6 @@ def update_student(
         student.group = group
 
     return student
-
-
-def _update_student_with_remove(
-    student: Student, request_data: StudentRequest
-) -> None:
-    """This function remove group and courses by provided ids in request data
-    we check group and courses ids if student's group and courses ids not the
-    same as provided id, ValueError raised, after checking we add courses and
-    group to the student"""
-    group_id = request_data.group_id
-    if group_id:
-        if not student.group_id == group_id:
-            raise ValueError(f"Student {student.id} not in group {group_id}")
-        student.group_id = None
-
-    if request_data.course_ids is not None:
-        courses = _get_course_by_ids_student(
-            request_data.course_ids, student_id=student.id, with_student=True
-        )
-        for course in courses:
-            student.courses.remove(course)
 
 
 @transaction
@@ -146,7 +140,9 @@ def delete_student(student: Student) -> None:
     s.user_db.delete(student)
 
 
-def _get_course_by_ids_student(course_ids, student_id, with_student):
+def _get_course_by_ids_student(
+    course_ids: list[int], student_id: int, with_student: bool
+) -> t.Sequence[Course]:
     """This function return courses by provided ids, if with_student set to
     True function return students which assigned to student by student_id, else
     students without provided student_id"""
