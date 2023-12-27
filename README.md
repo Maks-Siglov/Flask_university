@@ -128,7 +128,7 @@ remove student from group/courses.
     "first_name": "Taylor",
     "last_name": "Martin",
     "group_id": 5,
-    "course_ids": [5, 7],
+    "course_ids": [5, 7]
 }
 ```
 
@@ -175,7 +175,7 @@ a query parameter `api/v1/course/<int:course_id>/?action=remove` if you want to 
 ```json
 {
     "name": "Quantum physics",
-    "description": "section of theoretical physics, which study quantum systems and their laws"
+    "description": "section of theoretical physics, which study quantum systems and their laws",
     "student_ids": []
 }
 ```
