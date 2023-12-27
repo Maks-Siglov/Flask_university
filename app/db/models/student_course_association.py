@@ -1,24 +1,15 @@
-
-
-from sqlalchemy import (
-    Column,
-    ForeignKey,
-    Table
-)
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.models.base import Base
 
-student_course_association_table = Table(
-    "student_course_association",
-    Base.metadata,
-    Column(
-        "student_id",
-        ForeignKey("students.id", ondelete='RESTRICT'),
-        primary_key=True
-    ),
-    Column(
-        "course_id",
-        ForeignKey("courses.id", ondelete='RESTRICT'),
-        primary_key=True
+
+class StudentToCourse(Base):
+    __tablename__ = "student_to_course"
+
+    student_id: Mapped[int] = mapped_column(
+        ForeignKey("students.id", ondelete="CASCADE"), primary_key=True
     )
-)
+    course_id: Mapped[int] = mapped_column(
+        ForeignKey("courses.id", ondelete="CASCADE"), primary_key=True
+    )

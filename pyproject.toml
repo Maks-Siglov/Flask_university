@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "flask-university"
+version = "0.1.0"
+description = "This project provide api for convenient interaction with university"
+authors = ["Maks <gmb333x2@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+Flask = "^3.0.0"
+sqlalchemy = {extras = ["mypy"], version = "^2.0.23"}
+alembic = "^1.13.0"
+flake8 = "^6.1.0"
+flasgger = "^0.9.7.1"
+pydantic = "^2.5.2"
+python-dateutil = "^2.8.2"
+flask-restful = "^0.3.10"
+python-dotenv = "^1.0.0"
+psycopg2 = "^2.9.9"
+black = "^23.11.0"
+coverage = "^7.3.2"
+mypy = "^1.7.1"
+pre-commit = "^3.6.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

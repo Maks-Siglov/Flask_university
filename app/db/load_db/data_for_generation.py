@@ -1,15 +1,47 @@
-
-
 STUDENT_FIRS_NAMES = [
-    'Alice', 'Bob', 'Charlie', 'David', 'Emma', 'Frank', 'Grace', 'Henry',
-    'Ivy', 'Jack', 'Katherine', 'Liam', 'Mia', 'Noah', 'Olivia', 'Peter',
-    'Quinn', 'Rachel', 'Samuel', 'Taylor',
+    "Alice",
+    "Bob",
+    "Charlie",
+    "David",
+    "Emma",
+    "Frank",
+    "Grace",
+    "Henry",
+    "Ivy",
+    "Jack",
+    "Katherine",
+    "Liam",
+    "Mia",
+    "Noah",
+    "Olivia",
+    "Peter",
+    "Quinn",
+    "Rachel",
+    "Samuel",
+    "Taylor",
 ]
 
 STUDENT_LAST_NAMES = [
-    'Smith', 'Johnson', 'Williams', 'Jones', 'Brown', 'Davis', 'Miller',
-    'Wilson', 'Moore', 'Taylor', 'Anderson', 'Thomas', 'Jackson', 'White',
-    'Harris', 'Martin', 'Thompson', 'Garcia', 'Martinez', 'Robinson',
+    "Smith",
+    "Johnson",
+    "Williams",
+    "Jones",
+    "Brown",
+    "Davis",
+    "Miller",
+    "Wilson",
+    "Moore",
+    "Taylor",
+    "Anderson",
+    "Thomas",
+    "Jackson",
+    "White",
+    "Harris",
+    "Martin",
+    "Thompson",
+    "Garcia",
+    "Martinez",
+    "Robinson",
 ]
 
 COURSES = {
@@ -23,5 +55,5 @@ COURSES = {
     "Art History": "Study of visual arts throughout history.",
     "Psychology": "Understanding human behavior and mental processes.",
     "Economics": "Principles of production, distribution, consumption of goods"
-                 " and services.",
+    " and services.",
 }
